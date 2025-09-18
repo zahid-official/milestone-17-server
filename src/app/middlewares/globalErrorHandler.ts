@@ -3,9 +3,9 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import envVars from "../config/env";
-import AppError from "../errors/AppError";
+import { ZodError } from "zod";
 
-const globalErrorHandler = (
+const globalErrorHandler = async (
   error: any,
   req: Request,
   res: Response,
@@ -17,18 +17,37 @@ const globalErrorHandler = (
   }
 
   // Default error values
-  let statusCode = httpStatus.INTERNAL_SERVER_ERROR;
-  let message = "Something went wrong!!";
+  let statusCode = error.statusCode || httpStatus.INTERNAL_SERVER_ERROR;
+  let message = error.message || "Something went wrong!!";
+  let errorDetails = error;
 
-  // Handle custom error
-  if (error instanceof AppError) {
-    statusCode = error.statusCode;
-    message = error.message;
+  // Zod validation error handling
+  if (error instanceof ZodError) {
+    statusCode = httpStatus.BAD_REQUEST;
+    message = "Validation failed";
+    errorDetails = error.issues;
   }
 
-  // Handle built-in Error
-  else if (error instanceof Error) {
-    statusCode = httpStatus.INTERNAL_SERVER_ERROR;
+  // Mongoose duplicate key error handling
+  else if (error.code && error.code === 11000) {
+    statusCode = httpStatus.BAD_REQUEST;
+    message = `${Object.values(
+      error.keyValue
+    )} is already associated with an existing one. Please use another value.`;
+  }
+
+  // Mongoose cast error handling
+  else if (error.name === "CastError") {
+    statusCode = httpStatus.BAD_REQUEST;
+    message = "Invalid ObjectID. Please provide a valid MongoDB ObjectID";
+  }
+
+  // JWT error handling
+  else if (
+    error.name === "JsonWebTokenError" ||
+    error.name === "TokenExpiredError"
+  ) {
+    statusCode = httpStatus.UNAUTHORIZED;
     message = error.message;
   }
 
@@ -36,8 +55,14 @@ const globalErrorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
-    error,
-    stack: envVars.NODE_ENV === "development" ? error.stack : null,
+    error: errorDetails,
+    stack:
+      envVars.NODE_ENV === "development"
+        ? error.stack
+            ?.split("\n")
+            .map((line: any) => line.trim())
+            .filter((line: any) => line.startsWith("at"))
+        : null,
   });
 };
 

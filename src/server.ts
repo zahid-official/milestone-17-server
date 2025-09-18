@@ -4,6 +4,7 @@ import app from "./app";
 import { Server } from "http";
 import mongoose from "mongoose";
 import envVars from "./app/config/env";
+import defaultAdmin from "./app/utils/defaultAdmin";
 
 let server: Server;
 const port = envVars.PORT || 3000;
@@ -17,7 +18,7 @@ const bootstrap = async () => {
 
     // Start the express server
     server = app.listen(port, () => {
-      console.log(`Server running on port ${process.env.port}`);
+      console.log(`Server running on port ${port}`);
     });
   } catch (error) {
     console.error({
@@ -29,8 +30,11 @@ const bootstrap = async () => {
   }
 };
 
-// Start the application
-bootstrap();
+// Initialize the application
+(async () => {
+  await bootstrap();
+  await defaultAdmin();
+})();
 
 // Graceful shutdown handlers
 const handleExit = (signal: string, error?: unknown) => {
