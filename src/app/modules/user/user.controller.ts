@@ -71,12 +71,31 @@ const registerUser = catchAsync(
   }
 );
 
+// Update user
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.params?.id;
+    const body = req?.body;
+    const decodedToken = req.decodedToken;
+    const result = await userService.updateUser(userId, body, decodedToken);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User details updated successfully",
+      data: result,
+    });
+  }
+);
+
 // User controller object
 const userController = {
   getAllUsers,
   getSingleUser,
   getProfileInfo,
   registerUser,
+  updateUser,
 };
 
 export default userController;

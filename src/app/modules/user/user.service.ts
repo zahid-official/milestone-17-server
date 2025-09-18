@@ -1,10 +1,11 @@
 import bcrypt from "bcryptjs";
 import User from "./user.model";
 import envVars from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
-import { IAuthProvider, IUser } from "./user.interface";
+import { IAuthProvider, IUser, Role } from "./user.interface";
 
 // Get all users
 const getAllUsers = async (query: Record<string, string>) => {
@@ -77,12 +78,75 @@ const registerUser = async (payload: Partial<IUser>) => {
   return data;
 };
 
+// Update user details
+const updateUser = async (
+  userId: string,
+  payload: Partial<IUser>,
+  decodedToken: JwtPayload
+) => {
+  if (
+    (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) &&
+    userId !== decodedToken.userId
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You can only update your own profile"
+    );
+  }
+
+  const isUserExists = await User.findById(userId);
+  if (!isUserExists) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  // Prevent modification of super admin account by non-super admin users
+  if (isUserExists?.role === Role.ADMIN && decodedToken.role !== Role.ADMIN) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You don't have permission to modify super admin account"
+    );
+  }
+
+  if (
+    payload?.role &&
+    (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER)
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You don't have permission to change role"
+    );
+  }
+
+  // Prevent status modification by non-admin users
+  if (
+    (payload?.accountStatus || payload?.isDeleted || payload?.isVerified) &&
+    (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER)
+  ) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You don't have permission to change account status, delete status or verfication status."
+    );
+  }
+
+  const user = await User.findByIdAndUpdate(userId, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  // Convert to plain object & remove password before sending response
+  const data = user?.toObject();
+  delete data?.password;
+
+  return data;
+};
+
 // User service object
 const userService = {
   getAllUsers,
   getSingleUser,
   getProfileInfo,
   registerUser,
+  updateUser,
 };
 
 export default userService;

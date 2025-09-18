@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { Role } from "./user.interface";
 import userController from "./user.controller";
-import { registerUserZodSchema } from "./user.validation";
 import validateToken from "../../middlewares/validateToken";
 import validateSchema from "../../middlewares/validateSchema";
+import { registerUserZodSchema, updateUserZodSchema } from "./user.validation";
 
 // Initialize router
 const router = Router();
@@ -26,6 +26,14 @@ router.post(
   "/register",
   validateSchema(registerUserZodSchema),
   userController.registerUser
+);
+
+// Patch routes
+router.patch(
+  "/update/:id",
+  validateToken(...Object.values(Role)),
+  validateSchema(updateUserZodSchema),
+  userController.updateUser
 );
 
 // Export user routes
