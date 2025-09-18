@@ -11,7 +11,10 @@ const getAllUsers = async (query: Record<string, string>) => {
   // Define searchable fields
   const searchFields = ["name", "email"];
 
-  const queryBuilder = new QueryBuilder<IUser>(User.find(), query);
+  const queryBuilder = new QueryBuilder<IUser>(
+    User.find().select("-password").lean(),
+    query
+  );
   const users = await queryBuilder
     .sort()
     .filter()
@@ -27,6 +30,12 @@ const getAllUsers = async (query: Record<string, string>) => {
     data: users,
     meta,
   };
+};
+
+// Get single user
+const getSingleUser = async (id: string) => {
+  const user = await User.findById(id).select("-password");
+  return user;
 };
 
 // Register new user
@@ -65,6 +74,7 @@ const registerUser = async (payload: Partial<IUser>) => {
 // User service object
 const userService = {
   getAllUsers,
+  getSingleUser,
   registerUser,
 };
 

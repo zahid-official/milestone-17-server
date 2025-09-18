@@ -10,6 +10,7 @@ const router = Router();
 
 // Get routes
 router.get("/", validateToken(Role.ADMIN), userController.getAllUsers);
+router.get("/:id", validateToken(Role.ADMIN), userController.getSingleUser);
 
 // Post routes
 router.post(
