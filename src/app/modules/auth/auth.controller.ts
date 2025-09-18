@@ -7,8 +7,8 @@ import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 import getTokens from "../../utils/getTokens";
 import catchAsync from "../../utils/catchAsync";
-import { setCookies } from "../../utils/cookies";
 import sendResponse from "../../utils/sendResponse";
+import { clearCookies, setCookies } from "../../utils/cookies";
 
 // Regenerate access token
 const regenerateAccessToken = catchAsync(
@@ -64,10 +64,27 @@ const credentialsLogin = catchAsync(
   }
 );
 
+// Logout user
+const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Clear cookies
+    clearCookies(res);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User logged out successfully",
+      data: null,
+    });
+  }
+);
+
 // Auth controller object
 const authController = {
   regenerateAccessToken,
   credentialsLogin,
+  logout,
 };
 
 export default authController;
