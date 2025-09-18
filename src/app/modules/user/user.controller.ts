@@ -5,7 +5,6 @@ import httpStatus from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 
-
 // Get all users
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -41,6 +40,22 @@ const getSingleUser = catchAsync(
   }
 );
 
+// Get profile info
+const getProfileInfo = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.decodedToken?.userId;
+    const result = await userService.getProfileInfo(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Profile info retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Create new user
 const registerUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -60,6 +75,7 @@ const registerUser = catchAsync(
 const userController = {
   getAllUsers,
   getSingleUser,
+  getProfileInfo,
   registerUser,
 };
 

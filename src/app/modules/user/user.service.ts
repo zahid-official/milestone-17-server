@@ -38,6 +38,12 @@ const getSingleUser = async (id: string) => {
   return user;
 };
 
+// Get profile info
+const getProfileInfo = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  return user;
+};
+
 // Register new user
 const registerUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload || {};
@@ -75,6 +81,7 @@ const registerUser = async (payload: Partial<IUser>) => {
 const userService = {
   getAllUsers,
   getSingleUser,
+  getProfileInfo,
   registerUser,
 };
 
