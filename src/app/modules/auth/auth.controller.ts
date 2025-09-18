@@ -80,11 +80,29 @@ const logout = catchAsync(
   }
 );
 
+
+// Account verification via OTP
+const otpVerification = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { name, email } = req.body;
+    const result = await authService.otpVerification(name, email);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "OTP sent successfully",
+      data: result,
+    });
+  }
+);
+
 // Auth controller object
 const authController = {
   regenerateAccessToken,
   credentialsLogin,
   logout,
+  otpVerification,
 };
 
 export default authController;

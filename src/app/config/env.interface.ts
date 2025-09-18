@@ -14,6 +14,21 @@ interface EnvConfig {
 
   DEFAULT_ADMIN_EMAIL: string;
   DEFAULT_ADMIN_PASSWORD: string;
+
+  RADIS: {
+    HOST: string;
+    PORT: number;
+    USERNAME: string;
+    PASSWORD: string;
+  };
+
+  SMTP: {
+    HOST: string;
+    PORT: number;
+    FROM: string;
+    USERNAME: string;
+    PASSWORD: string;
+  };
 }
 
 export default EnvConfig;

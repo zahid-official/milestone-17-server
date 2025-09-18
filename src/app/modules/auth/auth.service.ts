@@ -4,6 +4,9 @@ import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import { verifyJWT } from "../../utils/JWT";
 import AppError from "../../errors/AppError";
+import { redisClient } from "../../config/redis";
+import generateOtp from "../../utils/generateOtp";
+import { sendEmail } from "../../utils/sendEmail";
 import { recreateToken } from "../../utils/getTokens";
 import { AccountStatus } from "../user/user.interface";
 
@@ -56,9 +59,51 @@ const regenerateAccessToken = async (refreshToken: string) => {
   return { accessToken };
 };
 
+// Account verification via OTP
+const otpVerification = async (name: string, email: string) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (user.isVerified) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "User already verified. Please login"
+    );
+  }
+
+  // Store otp in redis with expiry time of 2 minutes
+  const otp = generateOtp(6);
+  const redisKey = `otp:${email}`;
+  await redisClient.set(redisKey, otp, {
+    expiration: {
+      type: "EX",
+      value: 60 * 2,
+    },
+  });
+
+  // Send otp to email
+  await sendEmail({
+    to: email,
+    subject: "OTP code for account verification",
+    templateName: "sendOtp",
+    templateData: {
+      name: name,
+      otpCode: otp,
+      companyName: "Velocia",
+      expiryTime: "2 minutes",
+    },
+  });
+
+  return null;
+};
+
 // Auth service object
 const authService = {
   regenerateAccessToken,
+  otpVerification,
 };
 
 export default authService;

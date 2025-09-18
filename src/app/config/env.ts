@@ -19,6 +19,17 @@ const loadEnvs = (): EnvConfig => {
 
     "DEFAULT_ADMIN_EMAIL",
     "DEFAULT_ADMIN_PASSWORD",
+
+    "RADIS_HOST",
+    "RADIS_PORT",
+    "RADIS_USERNAME",
+    "RADIS_PASSWORD",
+
+    "SMTP_PORT",
+    "SMTP_HOST",
+    "SMTP_FROM",
+    "SMTP_USERNAME",
+    "SMTP_PASSWORD",
   ];
   requiredEnvs.forEach((key) => {
     if (!process.env[key]) {
@@ -43,6 +54,21 @@ const loadEnvs = (): EnvConfig => {
 
     DEFAULT_ADMIN_EMAIL: process.env.DEFAULT_ADMIN_EMAIL as string,
     DEFAULT_ADMIN_PASSWORD: process.env.DEFAULT_ADMIN_PASSWORD as string,
+
+    RADIS: {
+      HOST: process.env.RADIS_HOST as string,
+      PORT: Number(process.env.RADIS_PORT) as number,
+      USERNAME: process.env.RADIS_USERNAME as string,
+      PASSWORD: process.env.RADIS_PASSWORD as string,
+    },
+
+    SMTP: {
+      HOST: process.env.SMTP_HOST as string,
+      FROM: process.env.SMTP_FROM as string,
+      PORT: Number(process.env.SMTP_PORT) as number,
+      USERNAME: process.env.SMTP_USERNAME as string,
+      PASSWORD: process.env.SMTP_PASSWORD as string,
+    },
   };
 };
 
