@@ -60,7 +60,7 @@ const regenerateAccessToken = async (refreshToken: string) => {
 };
 
 // Account verification via OTP
-const otpVerification = async (name: string, email: string) => {
+const sendOTP = async (name: string, email: string) => {
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -100,10 +100,50 @@ const otpVerification = async (name: string, email: string) => {
   return null;
 };
 
+// Verify OTP and validate account
+const verifyOTP = async (email: string, otp: string) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (user.isVerified) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "User already verified. Please login"
+    );
+  }
+
+  // Get otp from redis & check otp existance
+  const redisKey = `otp:${email}`;
+  const verifyOtp = await redisClient.get(redisKey);
+
+  if (!verifyOtp) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "OTP expired or invalid. Please request a new one"
+    );
+  }
+
+  if (verifyOtp !== otp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid OTP. Please try again");
+  }
+
+  // Update user as verified and delete otp from redis
+  await Promise.all([
+    User.updateOne({ email }, { isVerified: true }, { runValidators: true }),
+    redisClient.del(redisKey),
+  ]);
+
+  return null;
+};
+
 // Auth service object
 const authService = {
   regenerateAccessToken,
-  otpVerification,
+  sendOTP,
+  verifyOTP,
 };
 
 export default authService;
