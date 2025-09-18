@@ -4,14 +4,26 @@ import notFoundHandler from "./app/middlewares/notFoundHandler";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import moduleRouter from "./app/routes";
 import cookieParser from "cookie-parser";
+import passport from "passport";
+import expressSession from "express-session";
+import envVars from "./app/config/env";
+import "./app/config/passport";
 
 // Express application
 const app: Application = express();
 
 // Middlewares
+app.use(
+  expressSession({
+    secret: envVars.EXPRESS_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // routes middleware
