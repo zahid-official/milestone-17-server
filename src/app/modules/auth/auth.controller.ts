@@ -150,6 +150,24 @@ const forgotPassword = catchAsync(
   }
 );
 
+// Reset password
+const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req?.body?.id;
+    const userId = req?.decodedToken.userId;
+    const newPassword = req?.body?.newPassword;
+    const result = await authService.resetPassword(userId, id, newPassword);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password reset successfully",
+      data: result,
+    });
+  }
+);
+
 // Auth controller object
 const authController = {
   regenerateAccessToken,
@@ -159,6 +177,7 @@ const authController = {
   verifyOTP,
   changePassword,
   forgotPassword,
+  resetPassword,
 };
 
 export default authController;
