@@ -112,6 +112,28 @@ const verifyOTP = catchAsync(
   }
 );
 
+// Change password
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req?.decodedToken;
+    const { oldPassword, newPassword } = req?.body || {};
+
+    const result = await authService.changePassword(
+      decodedToken,
+      oldPassword,
+      newPassword
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Password changed successfully",
+      data: result,
+    });
+  }
+);
+
 // Auth controller object
 const authController = {
   regenerateAccessToken,
@@ -119,6 +141,7 @@ const authController = {
   logout,
   sendOTP,
   verifyOTP,
+  changePassword,
 };
 
 export default authController;

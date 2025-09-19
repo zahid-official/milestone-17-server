@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import User from "../user/user.model";
 import envVars from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
@@ -139,11 +140,38 @@ const verifyOTP = async (email: string, otp: string) => {
   return null;
 };
 
+// Change password
+const changePassword = async (
+  decodedToken: JwtPayload,
+  oldPassword: string,
+  newPassword: string
+) => {
+  const user = await User.findById(decodedToken?.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const isPasswordMatched = await bcrypt.compare(
+    oldPassword,
+    user.password as string
+  );
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old password is incorrect");
+  }
+
+  // Hash the new password and save to database
+  user.password = await bcrypt.hash(newPassword, envVars.BCRYPT_SALT_ROUNDS);
+  user.save();
+
+  return null;
+};
+
 // Auth service object
 const authService = {
   regenerateAccessToken,
   sendOTP,
   verifyOTP,
+  changePassword,
 };
 
 export default authService;

@@ -1,7 +1,13 @@
 import { Router } from "express";
+import { Role } from "../user/user.interface";
 import authController from "./auth.controller";
+import validateToken from "../../middlewares/validateToken";
 import validateSchema from "../../middlewares/validateSchema";
-import { sendOtpZodSchema, verifyOtpZodSchema } from "./auth.validation";
+import {
+  changePasswordZodSchema,
+  sendOtpZodSchema,
+  verifyOtpZodSchema,
+} from "./auth.validation";
 
 // Initialize router
 const router = Router();
@@ -21,6 +27,14 @@ router.post(
   "/verifyOTP",
   validateSchema(verifyOtpZodSchema),
   authController.verifyOTP
+);
+
+// Patch routes
+router.patch(
+  "/change-password",
+  validateToken(...Object.values(Role)),
+  validateSchema(changePasswordZodSchema),
+  authController.changePassword
 );
 
 // Export auth routes
