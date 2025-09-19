@@ -32,10 +32,10 @@ export enum AvailabilityStatus {
 export interface IDriver {
   userId: Types.ObjectId;
   licenseNumber: string;
-  isDeleted?: boolean;
   vehicleInfo: IVehicle;
+  isDeleted?: boolean;
   status?: DriverStatus;
-  availability?: AvailabilityStatus;
   rides?: Types.ObjectId[];
   earnings?: Types.ObjectId[];
+  availability?: AvailabilityStatus;
 }
