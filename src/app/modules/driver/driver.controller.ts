@@ -17,7 +17,23 @@ const getAllDriverApplications = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Driver applications retrieved successfully",
+      message: "All driver applications retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+// Get single driver applications
+const getSingleDriverApplication = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.getSingleDriverApplication(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver application retrieved successfully",
       data: result,
     });
   }
@@ -75,6 +91,7 @@ const rejectDriver = catchAsync(
 // Driver controller object
 const driverController = {
   getAllDriverApplications,
+  getSingleDriverApplication,
   becomeDriver,
   approveDriver,
   rejectDriver,

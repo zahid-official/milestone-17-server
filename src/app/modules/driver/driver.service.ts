@@ -13,7 +13,12 @@ import { Role } from "../user/user.interface";
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
   // Define searchable fields
-  const searchFields = ["licenseNumber"];
+  const searchFields = [
+    "licenseNumber",
+    "vehicleInfo.vehicleType",
+    "vehicleInfo.plateNumber",
+    "vehicleInfo.vehicleModel",
+  ];
 
   const queryBuilder = new QueryBuilder<IDriver>(Driver.find(), query);
   const users = await queryBuilder
@@ -32,6 +37,15 @@ const getAllDriverApplications = async (query: Record<string, string>) => {
     data: users,
     meta,
   };
+};
+
+// Get single driver applications
+const getSingleDriverApplication = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+  }
+  return driver;
 };
 
 // Application for becoming a driver
@@ -109,6 +123,13 @@ const rejectDriver = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
   }
 
+  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This application has already been approved. You cannot reject an approved application"
+    );
+  }
+
   if (driver.applicationStatus === ApplicationStatus.REJECTED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -127,6 +148,7 @@ const rejectDriver = async (driverId: string) => {
 // Driver service object
 const driverService = {
   getAllDriverApplications,
+  getSingleDriverApplication,
   becomeDriver,
   approveDriver,
   rejectDriver,

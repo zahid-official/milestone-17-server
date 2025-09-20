@@ -14,6 +14,11 @@ router.get(
   validateToken(Role.ADMIN),
   driverController.getAllDriverApplications
 );
+router.get(
+  "/application/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.getSingleDriverApplication
+);
 
 // Post routes
 router.post(
