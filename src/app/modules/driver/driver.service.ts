@@ -102,11 +102,34 @@ const approveDriver = async (driverId: string) => {
   return driver;
 };
 
+// Reject driver
+const rejectDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+  }
+
+  if (driver.applicationStatus === ApplicationStatus.REJECTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This application has already been rejected"
+    );
+  }
+
+  // Reject the driver application
+  driver.applicationStatus = ApplicationStatus.REJECTED;
+  driver.availability = undefined;
+  await driver.save();
+  await User.findByIdAndUpdate(driver.userId, { role: Role.RIDER });
+  return driver;
+};
+
 // Driver service object
 const driverService = {
   getAllDriverApplications,
   becomeDriver,
   approveDriver,
+  rejectDriver,
 };
 
 export default driverService;

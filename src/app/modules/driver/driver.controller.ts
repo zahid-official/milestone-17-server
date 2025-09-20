@@ -40,7 +40,7 @@ const becomeDriver = catchAsync(
   }
 );
 
-// Approve driver 
+// Approve driver
 const approveDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const driverId = req?.params?.driverId;
@@ -56,10 +56,27 @@ const approveDriver = catchAsync(
   }
 );
 
+// Reject driver
+const rejectDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.rejectDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver application rejected successfully",
+      data: result,
+    });
+  }
+);
+
 // Driver controller object
 const driverController = {
   getAllDriverApplications,
   becomeDriver,
   approveDriver,
+  rejectDriver,
 };
 export default driverController;

@@ -26,8 +26,13 @@ router.post(
 // Patch routes
 router.patch(
   "/approve/:driverId",
-  validateToken(...Object.values(Role)),
+  validateToken(Role.ADMIN),
   driverController.approveDriver
+);
+router.patch(
+  "/reject/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.rejectDriver
 );
 
 // Export driver routes
