@@ -1,9 +1,14 @@
 import Driver from "./driver.model";
 import User from "../user/user.model";
 import httpStatus from "http-status-codes";
-import { IDriver } from "./driver.interface";
+import {
+  ApplicationStatus,
+  AvailabilityStatus,
+  IDriver,
+} from "./driver.interface";
 import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
+import { Role } from "../user/user.interface";
 
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
@@ -18,7 +23,7 @@ const getAllDriverApplications = async (query: Record<string, string>) => {
     .fieldSelect()
     .search(searchFields)
     .build()
-    .populate("userId", "name email phone role accountStatus");
+    .populate("userId", "name email phone role");
 
   // Get meta data for pagination
   const meta = await queryBuilder.meta();
@@ -75,6 +80,33 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
   return driver;
 };
 
+// Approve driver
+const approveDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+  }
+
+  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This application has already been approved"
+    );
+  }
+
+  // Approve the driver application
+  driver.applicationStatus = ApplicationStatus.APPROVED;
+  driver.availability = AvailabilityStatus.ONLINE;
+  await driver.save();
+  await User.findByIdAndUpdate(driver.userId, { role: Role.DRIVER });
+  return driver;
+};
+
 // Driver service object
-const driverService = { getAllDriverApplications, becomeDriver };
+const driverService = {
+  getAllDriverApplications,
+  becomeDriver,
+  approveDriver,
+};
+
 export default driverService;

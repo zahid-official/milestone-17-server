@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import {
   ApplicationStatus,
+  AvailabilityStatus,
   IDriver,
   IVehicle,
   VehicleType,
@@ -30,6 +31,10 @@ const driverSchema = new Schema<IDriver>(
     licenseNumber: { type: String, required: true, unique: true },
     vehicleInfo: vehicleSchema,
 
+    availability: {
+      type: String,
+      enum: Object.values(AvailabilityStatus),
+    },
     applicationStatus: {
       type: String,
       enum: Object.values(ApplicationStatus),

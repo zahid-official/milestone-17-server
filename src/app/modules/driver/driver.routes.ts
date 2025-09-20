@@ -23,6 +23,13 @@ router.post(
   driverController.becomeDriver
 );
 
+// Patch routes
+router.patch(
+  "/approve/:driverId",
+  validateToken(...Object.values(Role)),
+  driverController.approveDriver
+);
+
 // Export driver routes
 const driverRoutes = router;
 export default driverRoutes;

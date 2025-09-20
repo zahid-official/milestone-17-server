@@ -23,12 +23,11 @@ const getAllDriverApplications = catchAsync(
   }
 );
 
-// Driver application
+// Apply for becoming a driver
 const becomeDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req?.body;
     const userId = req?.decodedToken?.userId;
-
     const result = await driverService.becomeDriver(userId, body);
 
     // Send response
@@ -41,9 +40,26 @@ const becomeDriver = catchAsync(
   }
 );
 
+// Approve driver 
+const approveDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.approveDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver application approved successfully",
+      data: result,
+    });
+  }
+);
+
 // Driver controller object
 const driverController = {
   getAllDriverApplications,
   becomeDriver,
+  approveDriver,
 };
 export default driverController;
