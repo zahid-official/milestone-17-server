@@ -5,10 +5,10 @@ import { VehicleType } from "./driver.interface";
 // IVehicle schema
 const VehicleSchema = z.object({
   // Vehicle Type
-  type: z.enum(Object.values(VehicleType)),
+  vehicleType: z.enum(Object.values(VehicleType)),
 
   // Vehicle Model
-  model: z
+  vehicleModel: z
     .string({
       error: (issue) =>
         issue.input === undefined
@@ -32,8 +32,8 @@ const VehicleSchema = z.object({
     .trim(),
 });
 
-// Zod scheme for create driver
-export const createDriverZodSchema = z.object({
+// Zod scheme for becoming a driver
+export const becomeDriverZodSchema = z.object({
   // UserId
   userId: z
     .string({

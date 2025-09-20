@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 import {
-  AvailabilityStatus,
-  DriverStatus,
+  ApplicationStatus,
   IDriver,
   IVehicle,
   VehicleType,
@@ -10,9 +9,13 @@ import {
 // Define vehicle schema
 const vehicleSchema = new Schema<IVehicle>(
   {
-    type: { type: String, enum: Object.values(VehicleType), required: true },
-    model: { type: String, required: true },
-    plateNumber: { type: String, required: true },
+    vehicleType: {
+      type: String,
+      enum: Object.values(VehicleType),
+      required: true,
+    },
+    vehicleModel: { type: String, required: true },
+    plateNumber: { type: String, required: true, unique: true },
   },
   {
     versionKey: false,
@@ -21,23 +24,23 @@ const vehicleSchema = new Schema<IVehicle>(
 );
 
 // Mongoose schema for driver model
-const driverSchema = new Schema<IDriver>({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  licenseNumber: { type: String, required: true },
-  vehicleInfo: vehicleSchema,
-  isDeleted: { type: Boolean, default: false },
+const driverSchema = new Schema<IDriver>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    licenseNumber: { type: String, required: true, unique: true },
+    vehicleInfo: vehicleSchema,
 
-  status: {
-    type: String,
-    enum: Object.values(DriverStatus),
-    default: DriverStatus.PENDING,
+    applicationStatus: {
+      type: String,
+      enum: Object.values(ApplicationStatus),
+      default: ApplicationStatus.PENDING,
+    },
   },
-  availability: {
-    type: String,
-    enum: Object.values(AvailabilityStatus),
-    default: AvailabilityStatus.ONLINE,
-  },
-});
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
 // Create mongoose model from driver schema
 const Driver = model<IDriver>("Driver", driverSchema, "driverCollection");

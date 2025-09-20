@@ -49,6 +49,7 @@ router.patch(
   validateSchema(resetPasswordZodSchema),
   authController.resetPassword
 );
+
 // Export auth routes
 const authRoutes = router;
 export default authRoutes;

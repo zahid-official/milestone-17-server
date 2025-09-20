@@ -8,17 +8,16 @@ export enum VehicleType {
 
 // Vehicle information interface
 export interface IVehicle {
-  type: VehicleType;
-  model: string;
+  vehicleType: VehicleType;
+  vehicleModel: string;
   plateNumber: string;
 }
 
-// Defines driver status
-export enum DriverStatus {
+// Defines driver application status
+export enum ApplicationStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
-  SUSPENDED = "SUSPENDED",
 }
 
 // Defines driver availability
@@ -33,9 +32,8 @@ export interface IDriver {
   userId: Types.ObjectId;
   licenseNumber: string;
   vehicleInfo: IVehicle;
-  isDeleted?: boolean;
-  status?: DriverStatus;
   rides?: Types.ObjectId[];
   earnings?: Types.ObjectId[];
   availability?: AvailabilityStatus;
+  applicationStatus?: ApplicationStatus;
 }
