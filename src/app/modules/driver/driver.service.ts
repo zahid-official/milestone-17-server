@@ -1,8 +1,33 @@
+import Driver from "./driver.model";
 import User from "../user/user.model";
 import httpStatus from "http-status-codes";
 import { IDriver } from "./driver.interface";
 import AppError from "../../errors/AppError";
-import Driver from "./driver.model";
+import QueryBuilder from "../../utils/queryBuilder";
+
+// Get all driver applications
+const getAllDriverApplications = async (query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["licenseNumber"];
+
+  const queryBuilder = new QueryBuilder<IDriver>(Driver.find(), query);
+  const users = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone role accountStatus");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: users,
+    meta,
+  };
+};
 
 // Application for becoming a driver
 const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
@@ -51,7 +76,5 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
 };
 
 // Driver service object
-const driverService = {
-  becomeDriver,
-};
+const driverService = { getAllDriverApplications, becomeDriver };
 export default driverService;

@@ -8,6 +8,13 @@ import { Role } from "../user/user.interface";
 // Initialize router
 const router = Router();
 
+// Get routes
+router.get(
+  "/applications",
+  validateToken(Role.ADMIN),
+  driverController.getAllDriverApplications
+);
+
 // Post routes
 router.post(
   "/apply",
