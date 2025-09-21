@@ -114,12 +114,38 @@ const acceptRide = async (rideId: string) => {
   return ride;
 };
 
+// Reject a ride
+const rejectRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  if (ride.status !== RideStatus.REQUESTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'REQUESTED' can be rejected"
+    );
+  }
+
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    rejectedAt: new Date(),
+  };
+
+  ride.status = RideStatus.REJECTED;
+  await ride.save();
+  return ride;
+};
+
 // Ride service object
 const rideService = {
   getAllRequestedRides,
   requestRide,
   cancelRide,
   acceptRide,
+  rejectRide,
 };
 
 export default rideService;
