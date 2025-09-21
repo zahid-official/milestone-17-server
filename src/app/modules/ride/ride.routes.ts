@@ -16,6 +16,13 @@ router.post(
   rideController.requestRide
 );
 
+// Patch routes
+router.patch(
+  "/cancel/:rideId",
+  validateToken(Role.RIDER),
+  rideController.cancelRide
+);
+
 // Export ride routes
 const rideRoutes = router;
 export default rideRoutes;

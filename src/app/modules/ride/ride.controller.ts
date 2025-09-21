@@ -22,9 +22,26 @@ const requestRide = catchAsync(
   }
 );
 
+// Cancel a ride
+const cancelRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rideId = req?.params?.rideId;
+    const result = await rideService.cancelRide(rideId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride cancelled successfully",
+      data: result,
+    });
+  }
+);
+
 // Ride controller object
 const rideController = {
   requestRide,
+  cancelRide,
 };
 
 export default rideController;

@@ -41,9 +41,28 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
   return ride;
 };
 
+// Cancel a ride
+const cancelRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+  if (ride.status !== RideStatus.REQUESTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'REQUESTED' can be cancelled"
+    );
+  }
+
+  ride.status = RideStatus.CANCELLED;
+  await ride.save();
+  return ride;
+};
+
 // Ride service object
 const rideService = {
   requestRide,
+  cancelRide,
 };
 
 export default rideService;
