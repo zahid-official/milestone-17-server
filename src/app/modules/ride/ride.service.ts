@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Ride from "./ride.model";
+import mongoose from "mongoose";
 import User from "../user/user.model";
-import { IRide, RideStatus } from "./ride.interface";
 import httpStatus from "http-status-codes";
+import Driver from "../driver/driver.model";
 import AppError from "../../errors/AppError";
+import { IRide, RideStatus } from "./ride.interface";
 
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = async () => {
@@ -84,13 +86,14 @@ const cancelRide = async (rideId: string) => {
     cancelledAt: new Date(),
   };
 
+  // Update ride status to cancelled
   ride.status = RideStatus.CANCELLED;
   await ride.save();
   return ride;
 };
 
 // Accept a ride
-const acceptRide = async (rideId: string) => {
+const acceptRide = async (driverId: string, rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
@@ -103,12 +106,16 @@ const acceptRide = async (rideId: string) => {
     );
   }
 
+  // Assign driver to the ride
+  ride.driverId = new mongoose.Types.ObjectId(driverId);
+
   // Merge existing timestamps info with the new one
   ride.timestamps = {
     ...(ride.timestamps as any).toObject(),
     acceptedAt: new Date(),
   };
 
+  // Update ride status to acctepted
   ride.status = RideStatus.ACCEPTED;
   await ride.save();
   return ride;
@@ -134,6 +141,7 @@ const rejectRide = async (rideId: string) => {
     rejectedAt: new Date(),
   };
 
+  // Update ride status to rejected
   ride.status = RideStatus.REJECTED;
   await ride.save();
   return ride;
@@ -159,6 +167,7 @@ const pickUpRider = async (rideId: string) => {
     pickedUpAt: new Date(),
   };
 
+  // Update ride status to picked up
   ride.status = RideStatus.PICKED_UP;
   await ride.save();
   return ride;
@@ -184,6 +193,7 @@ const inTransitRide = async (rideId: string) => {
     inTransitAt: new Date(),
   };
 
+  // Update ride status to in transit
   ride.status = RideStatus.IN_TRANSIT;
   await ride.save();
   return ride;
@@ -209,8 +219,16 @@ const completeRide = async (rideId: string) => {
     completedAt: new Date(),
   };
 
+  // Update ride status to completed and add ride reference to driver
   ride.status = RideStatus.COMPLETED;
   await ride.save();
+  await Driver.findOneAndUpdate(
+    { userId: ride.driverId },
+    {
+      $push: { rides: ride._id },
+    }
+  );
+
   return ride;
 };
 

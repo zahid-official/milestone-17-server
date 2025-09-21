@@ -57,7 +57,8 @@ const cancelRide = catchAsync(
 const acceptRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
-    const result = await rideService.acceptRide(rideId);
+    const driverId = req?.decodedToken?.userId;
+    const result = await rideService.acceptRide(driverId, rideId);
 
     // Send response
     sendResponse(res, {

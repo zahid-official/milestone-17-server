@@ -33,7 +33,6 @@ export interface IDriver {
   licenseNumber: string;
   vehicleInfo: IVehicle;
   rides?: Types.ObjectId[];
-  earnings?: Types.ObjectId[];
   availability?: AvailabilityStatus;
   applicationStatus?: ApplicationStatus;
 }

@@ -40,6 +40,7 @@ const driverSchema = new Schema<IDriver>(
       enum: Object.values(ApplicationStatus),
       default: ApplicationStatus.PENDING,
     },
+    rides: [{ type: Schema.Types.ObjectId, ref: "Ride" }],
   },
   {
     timestamps: true,
