@@ -1,6 +1,7 @@
 import { Router } from "express";
 import validateSchema from "../../middlewares/validateSchema";
 import {
+  availabilityStatusZodSchema,
   becomeDriverZodSchema,
   updateDriverDetailsZodSchema,
 } from "./driver.validation";
@@ -47,6 +48,12 @@ router.patch(
   validateToken(...Object.values(Role)),
   validateSchema(updateDriverDetailsZodSchema),
   driverController.updateDriverDetails
+);
+router.patch(
+  "/availability/:driverId",
+  validateToken(Role.DRIVER),
+  validateSchema(availabilityStatusZodSchema),
+  driverController.availabilityStatus
 );
 
 // Export driver routes

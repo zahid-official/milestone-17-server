@@ -217,6 +217,40 @@ const updateDriverDetails = async (
   return updatedDriver;
 };
 
+// Update availability status
+const availabilityStatus = async (
+  userId: string,
+  driverId: string,
+  payload: Partial<IDriver>
+) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (userId !== driver.userId.toString()) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "You are not authorized to update this driver details"
+    );
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can update availability status"
+    );
+  }
+
+  // Update driver details
+  const updatedDriver = await Driver.findByIdAndUpdate(driverId, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  return updatedDriver;
+};
+
 // Driver service object
 const driverService = {
   getAllDriverApplications,
@@ -225,6 +259,7 @@ const driverService = {
   approveDriver,
   rejectDriver,
   updateDriverDetails,
+  availabilityStatus,
 };
 
 export default driverService;

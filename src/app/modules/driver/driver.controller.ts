@@ -110,6 +110,28 @@ const updateDriverDetails = catchAsync(
   }
 );
 
+// Update availablity status
+const availabilityStatus = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const body = req?.body;
+    const userId = req?.decodedToken?.userId;
+    const driverId = req?.params?.driverId;
+    const result = await driverService.availabilityStatus(
+      userId,
+      driverId,
+      body
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver details updated successfully",
+      data: result,
+    });
+  }
+);
+
 // Driver controller object
 const driverController = {
   getAllDriverApplications,
@@ -118,5 +140,6 @@ const driverController = {
   approveDriver,
   rejectDriver,
   updateDriverDetails,
+  availabilityStatus,
 };
 export default driverController;
