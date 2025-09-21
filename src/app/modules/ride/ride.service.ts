@@ -139,8 +139,8 @@ const rejectRide = async (rideId: string) => {
   return ride;
 };
 
-// Picked up a rider
-const pickedUpRider = async (rideId: string) => {
+// Pick up a rider
+const pickUpRider = async (rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
@@ -189,6 +189,31 @@ const inTransitRide = async (rideId: string) => {
   return ride;
 };
 
+// Complete a ride
+const completeRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  if (ride.status !== RideStatus.IN_TRANSIT) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'IN_TRANSIT' can be marked as 'COMPLETED'"
+    );
+  }
+
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    completedAt: new Date(),
+  };
+
+  ride.status = RideStatus.COMPLETED;
+  await ride.save();
+  return ride;
+};
+
 // Ride service object
 const rideService = {
   getAllRequestedRides,
@@ -196,8 +221,9 @@ const rideService = {
   cancelRide,
   acceptRide,
   rejectRide,
-  pickedUpRider,
+  pickUpRider,
   inTransitRide,
+  completeRide,
 };
 
 export default rideService;
