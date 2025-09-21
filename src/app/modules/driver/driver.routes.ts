@@ -1,6 +1,9 @@
 import { Router } from "express";
 import validateSchema from "../../middlewares/validateSchema";
-import { becomeDriverZodSchema } from "./driver.validation";
+import {
+  becomeDriverZodSchema,
+  updateDriverDetailsZodSchema,
+} from "./driver.validation";
 import driverController from "./driver.controller";
 import validateToken from "../../middlewares/validateToken";
 import { Role } from "../user/user.interface";
@@ -38,6 +41,12 @@ router.patch(
   "/reject/:driverId",
   validateToken(Role.ADMIN),
   driverController.rejectDriver
+);
+router.patch(
+  "/updateDetails/:driverId",
+  validateToken(...Object.values(Role)),
+  validateSchema(updateDriverDetailsZodSchema),
+  driverController.updateDriverDetails
 );
 
 // Export driver routes

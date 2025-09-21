@@ -2,7 +2,7 @@ import z from "zod";
 import { Types } from "mongoose";
 import { VehicleType } from "./driver.interface";
 
-// IVehicle schema
+// Vehicle schema
 const VehicleSchema = z.object({
   // Vehicle Type
   vehicleType: z.enum(Object.values(VehicleType)),
@@ -30,6 +30,28 @@ const VehicleSchema = z.object({
     .min(2, { error: "Plate Number must be at least 2 characters long." })
     .max(50, { error: "Plate Number cannot exceed 50 characters." })
     .trim(),
+});
+
+// Updated vehicle
+const UpdatedVehicle = z.object({
+  // Vehicle Type
+  vehicleType: z.enum(Object.values(VehicleType)).optional(),
+
+  // Vehicle Model
+  vehicleModel: z
+    .string({ error: "Model must be a string" })
+    .min(2, { error: "Model must be at least 2 characters long." })
+    .max(50, { error: "Model cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+
+  // Vehicle Plate Number
+  plateNumber: z
+    .string({ error: "Plate Number must be a string" })
+    .min(2, { error: "Plate Number must be at least 2 characters long." })
+    .max(50, { error: "Plate Number cannot exceed 50 characters." })
+    .trim()
+    .optional(),
 });
 
 // Zod scheme for becoming a driver
@@ -61,4 +83,18 @@ export const becomeDriverZodSchema = z.object({
 
   // Vehicle Info
   vehicleInfo: VehicleSchema,
+});
+
+// Zod scheme for update driver details
+export const updateDriverDetailsZodSchema = z.object({
+  // License Number
+  licenseNumber: z
+    .string({ error: "License number must be a string" })
+    .min(2, { error: "License number must be at least 2 characters long." })
+    .max(50, { error: "License number cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+
+  // Vehicle Info
+  vehicleInfo: UpdatedVehicle.optional(),
 });

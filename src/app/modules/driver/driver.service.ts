@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Driver from "./driver.model";
 import User from "../user/user.model";
 import httpStatus from "http-status-codes";
+import AppError from "../../errors/AppError";
+import { Role } from "../user/user.interface";
+import QueryBuilder from "../../utils/queryBuilder";
 import {
   ApplicationStatus,
   AvailabilityStatus,
   IDriver,
 } from "./driver.interface";
-import AppError from "../../errors/AppError";
-import QueryBuilder from "../../utils/queryBuilder";
-import { Role } from "../user/user.interface";
 
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
@@ -55,7 +56,7 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  if (userId !== payload.userId?.toString()) {
+  if (userId !== payload?.userId?.toString()) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to apply for driver. Please login to your account and try again"
@@ -63,7 +64,14 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
   }
 
   const existingDriver = await Driver.findOne({ userId: payload.userId });
-  if (existingDriver) {
+  if (existingDriver?.applicationStatus === ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This application has already been approved"
+    );
+  }
+
+  if (existingDriver?.applicationStatus === ApplicationStatus.PENDING) {
     throw new AppError(
       httpStatus.CONFLICT,
       "You have already applied for driver. Please wait for the approval"
@@ -145,6 +153,70 @@ const rejectDriver = async (driverId: string) => {
   return driver;
 };
 
+// Update driver details
+const updateDriverDetails = async (
+  userId: string,
+  driverId: string,
+  payload: Partial<IDriver>
+) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (userId !== driver.userId.toString()) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "You are not authorized to update this driver details"
+    );
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can update their details"
+    );
+  }
+
+  const existingLicense = await Driver.findOne({
+    _id: { $ne: driverId },
+    licenseNumber: payload.licenseNumber,
+  });
+  if (existingLicense) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "This license number is already in use. Please provide a different license number"
+    );
+  }
+
+  const existingPlate = await Driver.findOne({
+    _id: { $ne: driverId },
+    "vehicleInfo.plateNumber": payload.vehicleInfo?.plateNumber,
+  });
+  if (existingPlate) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      "This vehicle plate number is already in use. Please provide a different plate number"
+    );
+  }
+
+  // Merge existing vehicle info with the new one
+  if (payload.vehicleInfo) {
+    payload.vehicleInfo = {
+      ...(driver.vehicleInfo as any).toObject(),
+      ...payload.vehicleInfo,
+    };
+  }
+
+  // Update driver details
+  const updatedDriver = await Driver.findByIdAndUpdate(driverId, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  return updatedDriver;
+};
+
 // Driver service object
 const driverService = {
   getAllDriverApplications,
@@ -152,6 +224,7 @@ const driverService = {
   becomeDriver,
   approveDriver,
   rejectDriver,
+  updateDriverDetails,
 };
 
 export default driverService;
