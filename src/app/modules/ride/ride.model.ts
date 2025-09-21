@@ -4,7 +4,7 @@ import { IRide, ITimestamp, RideStatus } from "./ride.interface";
 // Define timestamps schema
 const timestampsSchema = new Schema<ITimestamp>(
   {
-    requestedAt: { type: Date, default: Date.now },
+    requestedAt: { type: Date },
     acceptedAt: { type: Date },
     rejectedAt: { type: Date },
     cancelledAt: { type: Date },

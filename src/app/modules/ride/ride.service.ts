@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Ride from "./ride.model";
 import User from "../user/user.model";
 import { IRide, RideStatus } from "./ride.interface";
@@ -47,10 +48,16 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
   if (rideRequest.length) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      "You have a pending ride request. Please complete or cancel the existing ride before requesting a new one"
+      `You have a ride request with status '${rideRequest[0].status}'. You can request a new ride once the current ride is completed or cancelled.`
     );
   }
 
+  // Set the requestedAt timestamp
+  payload.timestamps = {
+    requestedAt: new Date(),
+  };
+
+  // Create ride and add ride reference to user
   const ride = await Ride.create(payload);
   await User.findByIdAndUpdate(payload.userId, {
     $push: { rides: ride._id },
@@ -71,7 +78,38 @@ const cancelRide = async (rideId: string) => {
     );
   }
 
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    cancelledAt: new Date(),
+  };
+
   ride.status = RideStatus.CANCELLED;
+  await ride.save();
+  return ride;
+};
+
+// Accept a ride
+const acceptRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  if (ride.status !== RideStatus.REQUESTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'REQUESTED' can be accepted"
+    );
+  }
+
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    acceptedAt: new Date(),
+  };
+
+  ride.status = RideStatus.ACCEPTED;
   await ride.save();
   return ride;
 };
@@ -81,6 +119,7 @@ const rideService = {
   getAllRequestedRides,
   requestRide,
   cancelRide,
+  acceptRide,
 };
 
 export default rideService;

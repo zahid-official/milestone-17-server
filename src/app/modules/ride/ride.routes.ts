@@ -9,7 +9,11 @@ import rideController from "./ride.controller";
 const router = Router();
 
 // Get routes
-router.get("/requestedRides", validateToken(Role.ADMIN, Role.DRIVER), rideController.getAllRequestedRides);
+router.get(
+  "/requestedRides",
+  validateToken(Role.ADMIN, Role.DRIVER),
+  rideController.getAllRequestedRides
+);
 
 // Post routes
 router.post(
@@ -24,6 +28,11 @@ router.patch(
   "/cancel/:rideId",
   validateToken(Role.RIDER),
   rideController.cancelRide
+);
+router.patch(
+  "/accept/:rideId",
+  validateToken(Role.DRIVER),
+  rideController.acceptRide
 );
 
 // Export ride routes
