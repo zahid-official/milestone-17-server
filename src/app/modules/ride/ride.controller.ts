@@ -5,6 +5,21 @@ import httpStatus from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 
+// Get all requested rides (Admin and Driver only)
+const getAllRequestedRides = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await rideService.getAllRequestedRides();
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Requested rides retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Request a ride
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -40,6 +55,7 @@ const cancelRide = catchAsync(
 
 // Ride controller object
 const rideController = {
+  getAllRequestedRides,
   requestRide,
   cancelRide,
 };

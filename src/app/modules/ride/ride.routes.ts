@@ -8,6 +8,9 @@ import rideController from "./ride.controller";
 // Initialize router
 const router = Router();
 
+// Get routes
+router.get("/requestedRides", validateToken(Role.ADMIN, Role.DRIVER), rideController.getAllRequestedRides);
+
 // Post routes
 router.post(
   "/request",

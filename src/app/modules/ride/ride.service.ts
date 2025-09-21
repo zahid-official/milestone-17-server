@@ -4,16 +4,33 @@ import { IRide, RideStatus } from "./ride.interface";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 
+// Get all requested rides (Admin and Driver only)
+const getAllRequestedRides = async () => {
+  const rides = await Ride.find({ status: RideStatus.REQUESTED }).populate(
+    "userId",
+    "name email phone"
+  );
+  return rides;
+};
+
+// Request a ride
 const requestRide = async (userId: string, payload: Partial<IRide>) => {
+  if (userId !== payload?.userId?.toString()) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "You are not authorized to request a ride. Please login to your account and try again"
+    );
+  }
+
   const user = await User.findById(payload?.userId);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  if (userId !== payload?.userId?.toString()) {
+  if (!user?.phone) {
     throw new AppError(
-      httpStatus.UNAUTHORIZED,
-      "You are not authorized to request a ride. Please login to your account and try again"
+      httpStatus.BAD_REQUEST,
+      "Please update your profile with phone number before requesting a ride"
     );
   }
 
@@ -61,6 +78,7 @@ const cancelRide = async (rideId: string) => {
 
 // Ride service object
 const rideService = {
+  getAllRequestedRides,
   requestRide,
   cancelRide,
 };
