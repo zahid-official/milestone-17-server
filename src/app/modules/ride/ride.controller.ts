@@ -85,6 +85,22 @@ const rejectRide = catchAsync(
   }
 );
 
+// Picked up a rider
+const pickedUpRider = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rideId = req?.params?.rideId;
+    const result = await rideService.pickedUpRider(rideId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Rider picked up successfully",
+      data: result,
+    });
+  }
+);
+
 // Ride controller object
 const rideController = {
   getAllRequestedRides,
@@ -92,6 +108,7 @@ const rideController = {
   cancelRide,
   acceptRide,
   rejectRide,
+  pickedUpRider,
 };
 
 export default rideController;

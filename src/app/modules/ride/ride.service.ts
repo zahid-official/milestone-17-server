@@ -139,6 +139,31 @@ const rejectRide = async (rideId: string) => {
   return ride;
 };
 
+// Picked up a rider
+const pickedUpRider = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  if (ride.status !== RideStatus.ACCEPTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'ACCEPTED' can be marked as 'PICKED_UP'"
+    );
+  }
+
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    pickedUpAt: new Date(),
+  };
+
+  ride.status = RideStatus.PICKED_UP;
+  await ride.save();
+  return ride;
+};
+
 // Ride service object
 const rideService = {
   getAllRequestedRides,
@@ -146,6 +171,7 @@ const rideService = {
   cancelRide,
   acceptRide,
   rejectRide,
+  pickedUpRider,
 };
 
 export default rideService;

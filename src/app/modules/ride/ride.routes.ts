@@ -35,6 +35,11 @@ router.patch(
   rideController.acceptRide
 );
 router.patch(
+  "/pickedUp/:rideId",
+  validateToken(Role.DRIVER),
+  rideController.pickedUpRider
+);
+router.patch(
   "/reject/:rideId",
   validateToken(Role.DRIVER),
   rideController.rejectRide
