@@ -6,6 +6,7 @@ import validateSchema from "../../middlewares/validateSchema";
 import {
   changePasswordZodSchema,
   forgotPasswordZodSchema,
+  resetPasswordZodSchema,
   sendOtpZodSchema,
   verifyOtpZodSchema,
 } from "./auth.validation";
@@ -42,6 +43,13 @@ router.patch(
   validateSchema(forgotPasswordZodSchema),
   authController.forgotPassword
 );
+router.patch(
+  "/reset-password",
+  validateToken(...Object.values(Role)),
+  validateSchema(resetPasswordZodSchema),
+  authController.resetPassword
+);
+
 // Export auth routes
 const authRoutes = router;
 export default authRoutes;

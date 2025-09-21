@@ -216,6 +216,32 @@ const forgotPassword = async (email: string) => {
   return null;
 };
 
+// Reset password
+const resetPassword = async (
+  userId: string,
+  id: string,
+  newPassword: string
+) => {
+  if (userId !== id) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid user");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  // Hash the new password and save to database
+  const hashedPassword = await bcrypt.hash(
+    newPassword,
+    envVars.BCRYPT_SALT_ROUNDS
+  );
+  user.password = hashedPassword;
+  await user.save();
+
+  return null;
+};
+
 // Auth service object
 const authService = {
   regenerateAccessToken,
@@ -223,6 +249,7 @@ const authService = {
   verifyOTP,
   changePassword,
   forgotPassword,
+  resetPassword,
 };
 
 export default authService;
