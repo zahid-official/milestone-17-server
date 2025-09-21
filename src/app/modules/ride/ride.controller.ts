@@ -101,6 +101,22 @@ const pickedUpRider = catchAsync(
   }
 );
 
+// Ride in transit
+const inTransitRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rideId = req?.params?.rideId;
+    const result = await rideService.inTransitRide(rideId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride is now in transit",
+      data: result,
+    });
+  }
+);
+
 // Ride controller object
 const rideController = {
   getAllRequestedRides,
@@ -109,6 +125,7 @@ const rideController = {
   acceptRide,
   rejectRide,
   pickedUpRider,
+  inTransitRide,
 };
 
 export default rideController;

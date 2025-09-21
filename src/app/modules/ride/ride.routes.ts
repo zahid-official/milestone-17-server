@@ -44,6 +44,11 @@ router.patch(
   validateToken(Role.DRIVER),
   rideController.rejectRide
 );
+router.patch(
+  "/inTransit/:rideId",
+  validateToken(Role.DRIVER),
+  rideController.inTransitRide
+);
 
 // Export ride routes
 const rideRoutes = router;

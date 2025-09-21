@@ -164,6 +164,31 @@ const pickedUpRider = async (rideId: string) => {
   return ride;
 };
 
+// Ride in transit
+const inTransitRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId);
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  if (ride.status !== RideStatus.PICKED_UP) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only rides with status 'PICKED_UP' can be marked as 'IN_TRANSIT'"
+    );
+  }
+
+  // Merge existing timestamps info with the new one
+  ride.timestamps = {
+    ...(ride.timestamps as any).toObject(),
+    inTransitAt: new Date(),
+  };
+
+  ride.status = RideStatus.IN_TRANSIT;
+  await ride.save();
+  return ride;
+};
+
 // Ride service object
 const rideService = {
   getAllRequestedRides,
@@ -172,6 +197,7 @@ const rideService = {
   acceptRide,
   rejectRide,
   pickedUpRider,
+  inTransitRide,
 };
 
 export default rideService;
