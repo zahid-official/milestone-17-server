@@ -1,8 +1,8 @@
 import z from "zod";
 import { Types } from "mongoose";
 
-// Zod scheme for
-export const becomeDriverZodSchema = z.object({
+// Zod scheme for ride request validation
+export const rideRequestZodSchema = z.object({
   // UserId
   userId: z
     .string({
