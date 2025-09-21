@@ -27,10 +27,8 @@ const validateToken = (...userRoles: string[]) =>
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
 
-    // Find user by email
-    const user = await User.findOne({ email: verifiedAccessToken.email });
-
     // Check if user exists
+    const user = await User.findOne({ email: verifiedAccessToken.email });
     if (!user) {
       throw new AppError(httpStatus.UNAUTHORIZED, "User does not exist");
     }
@@ -43,10 +41,11 @@ const validateToken = (...userRoles: string[]) =>
       );
     }
 
-    // Check if user is blocked or inactive
+    // Check if user is inactive, blocked or suspended
     if (
       user.accountStatus === AccountStatus.BLOCKED ||
-      user.accountStatus === AccountStatus.INACTIVE
+      user.accountStatus === AccountStatus.INACTIVE ||
+      user.accountStatus === AccountStatus.SUSPENDED
     ) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,

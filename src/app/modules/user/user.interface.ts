@@ -12,6 +12,7 @@ export enum AccountStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   BLOCKED = "BLOCKED",
+  SUSPENDED = "SUSPENDED",
 }
 
 // Defines authentication provider interface
