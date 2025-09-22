@@ -14,12 +14,12 @@ const router = Router();
 
 // Get routes
 router.get(
-  "/applications",
+  "/",
   validateToken(Role.ADMIN),
   driverController.getAllDriverApplications
 );
 router.get(
-  "/application/:driverId",
+  "/:driverId",
   validateToken(Role.ADMIN),
   driverController.getSingleDriverApplication
 );

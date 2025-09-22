@@ -5,17 +5,40 @@ import httpStatus from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 
+// Get all rides (Admin only)
+const getAllRides = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const result = await rideService.getAllRides(
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All rides retrieved successfully",
+      data: result.data,
+      meta: result.meta,
+    });
+  }
+);
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await rideService.getAllRequestedRides();
+    const query = req?.query;
+    const result = await rideService.getAllRequestedRides(
+      query as Record<string, string>
+    );
 
     // Send response
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Requested rides retrieved successfully",
-      data: result,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -35,7 +58,8 @@ const viewRideHistory = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "Ride history retrieved successfully",
-      data: result,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -156,6 +180,7 @@ const completeRide = catchAsync(
 
 // Ride controller object
 const rideController = {
+  getAllRides,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,

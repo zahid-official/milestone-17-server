@@ -18,7 +18,8 @@ const getAllDriverApplications = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "All driver applications retrieved successfully",
-      data: result,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );

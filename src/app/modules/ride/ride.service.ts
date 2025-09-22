@@ -8,13 +8,55 @@ import AppError from "../../errors/AppError";
 import { IRide, RideStatus } from "./ride.interface";
 import QueryBuilder from "../../utils/queryBuilder";
 
+// Get all rides (Admin only)
+const getAllRides = async (query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
+};
+
 // Get all requested rides (Admin and Driver only)
-const getAllRequestedRides = async () => {
-  const rides = await Ride.find({ status: RideStatus.REQUESTED }).populate(
-    "userId",
-    "name email phone"
+const getAllRequestedRides = async (query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ status: RideStatus.REQUESTED }),
+    query
   );
-  return rides;
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
 };
 
 // View rider's ride history (Rider only)
@@ -268,6 +310,7 @@ const completeRide = async (rideId: string) => {
 
 // Ride service object
 const rideService = {
+  getAllRides,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,
