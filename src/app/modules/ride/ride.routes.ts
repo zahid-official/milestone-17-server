@@ -9,10 +9,17 @@ import rideController from "./ride.controller";
 const router = Router();
 
 // Get routes
+router.get("/", validateToken(Role.ADMIN), rideController.getAllRides);
+router.get("/singleRide/:rideId", validateToken(Role.ADMIN), rideController.getSingleRide);
 router.get(
   "/requestedRides",
   validateToken(Role.ADMIN, Role.DRIVER),
   rideController.getAllRequestedRides
+);
+router.get(
+  "/history",
+  validateToken(Role.RIDER),
+  rideController.viewRideHistory
 );
 
 // Post routes

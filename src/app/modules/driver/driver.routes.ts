@@ -14,14 +14,19 @@ const router = Router();
 
 // Get routes
 router.get(
-  "/applications",
+  "/",
   validateToken(Role.ADMIN),
   driverController.getAllDriverApplications
 );
 router.get(
-  "/application/:driverId",
+  "/:driverId",
   validateToken(Role.ADMIN),
   driverController.getSingleDriverApplication
+);
+router.get(
+  "/earinging",
+  validateToken(Role.DRIVER),
+  driverController.viewEarningsHistory
 );
 
 // Post routes
@@ -43,6 +48,17 @@ router.patch(
   validateToken(Role.ADMIN),
   driverController.rejectDriver
 );
+router.patch(
+  "/suspend/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.suspendDriver
+);
+router.patch(
+  "/unsuspend/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.unsuspendDriver
+);
+
 router.patch(
   "/updateDetails/:driverId",
   validateToken(...Object.values(Role)),

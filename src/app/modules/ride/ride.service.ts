@@ -6,14 +6,101 @@ import httpStatus from "http-status-codes";
 import Driver from "../driver/driver.model";
 import AppError from "../../errors/AppError";
 import { IRide, RideStatus } from "./ride.interface";
+import QueryBuilder from "../../utils/queryBuilder";
 
-// Get all requested rides (Admin and Driver only)
-const getAllRequestedRides = async () => {
-  const rides = await Ride.find({ status: RideStatus.REQUESTED }).populate(
+// Get all rides (Admin only)
+const getAllRides = async (query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
+};
+
+// Get single ride (Admin only)
+const getSingleRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId).populate(
     "userId",
     "name email phone"
   );
-  return rides;
+
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  return ride;
+};
+
+// Get all requested rides (Admin and Driver only)
+const getAllRequestedRides = async (query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ status: RideStatus.REQUESTED }),
+    query
+  );
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
+};
+
+// View rider's ride history (Rider only)
+const viewRideHistory = async (
+  userId: string,
+  query: Record<string, string>
+) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ userId: userId }),
+    query
+  );
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
 };
 
 // Request a ride
@@ -62,7 +149,7 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
   // Create ride and add ride reference to user
   const ride = await Ride.create(payload);
   await User.findByIdAndUpdate(payload.userId, {
-    $push: { rides: ride._id },
+    $push: { rides: new mongoose.Types.ObjectId(ride._id) },
   });
   return ride;
 };
@@ -103,6 +190,20 @@ const acceptRide = async (driverId: string, rideId: string) => {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "Only rides with status 'REQUESTED' can be accepted"
+    );
+  }
+
+  // check if driver already accepted a ride and assign driverId
+  const existingRide = await Ride.findOne({
+    driverId: driverId,
+    status: {
+      $in: [RideStatus.ACCEPTED, RideStatus.PICKED_UP, RideStatus.IN_TRANSIT],
+    },
+  });
+  if (existingRide) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You have already accepted a ride. Please complete the current ride before accepting a new one."
     );
   }
 
@@ -225,16 +326,22 @@ const completeRide = async (rideId: string) => {
   await Driver.findOneAndUpdate(
     { userId: ride.driverId },
     {
-      $push: { rides: ride._id },
+      $push: { completedRides: new mongoose.Types.ObjectId(ride._id) },
     }
   );
+  await User.findByIdAndUpdate(ride.driverId, {
+    $push: { rides: new mongoose.Types.ObjectId(ride._id) },
+  });
 
   return ride;
 };
 
 // Ride service object
 const rideService = {
+  getAllRides,
+  getSingleRide,
   getAllRequestedRides,
+  viewRideHistory,
   requestRide,
   cancelRide,
   acceptRide,

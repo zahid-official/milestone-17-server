@@ -3,7 +3,7 @@ import Driver from "./driver.model";
 import User from "../user/user.model";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
-import { Role } from "../user/user.interface";
+import { AccountStatus, Role } from "../user/user.interface";
 import QueryBuilder from "../../utils/queryBuilder";
 import {
   ApplicationStatus,
@@ -47,6 +47,15 @@ const getSingleDriverApplication = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
   }
   return driver;
+};
+
+// View earnings history (Driver only)
+const viewEarningsHistory = async (userId: string) => {
+  const user = await User.findById(userId).populate("rides");
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  return user.rides;
 };
 
 // Application for becoming a driver
@@ -106,7 +115,7 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
 const approveDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
   if (driver.applicationStatus === ApplicationStatus.APPROVED) {
@@ -128,7 +137,7 @@ const approveDriver = async (driverId: string) => {
 const rejectDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
   if (driver.applicationStatus === ApplicationStatus.APPROVED) {
@@ -151,6 +160,88 @@ const rejectDriver = async (driverId: string) => {
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.RIDER });
   return driver;
+};
+
+// Suspend driver
+const suspendDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can be suspended"
+    );
+  }
+
+  const user = await User.findById(driver.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
+  }
+
+  if (user.role !== Role.DRIVER) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "The associated user is not a driver"
+    );
+  }
+
+  if (user.accountStatus === AccountStatus.SUSPENDED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This driver is already suspended"
+    );
+  }
+
+  // Suspend the driver
+  user.accountStatus = AccountStatus.SUSPENDED;
+  await user.save();
+  driver.availability = AvailabilityStatus.OFFLINE;
+  await driver.save();
+  return null;
+};
+
+// Unsuspend driver
+const unsuspendDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can be unsuspended"
+    );
+  }
+
+  const user = await User.findById(driver.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
+  }
+
+  if (user.role !== Role.DRIVER) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "The associated user is not a driver"
+    );
+  }
+
+  if (user.accountStatus === AccountStatus.ACTIVE) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This driver is already unsuspended"
+    );
+  }
+
+  // Suspend the driver
+  user.accountStatus = AccountStatus.ACTIVE;
+  await user.save();
+  driver.availability = AvailabilityStatus.ONLINE;
+  await driver.save();
+  return null;
 };
 
 // Update driver details
@@ -255,9 +346,12 @@ const availabilityStatus = async (
 const driverService = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  viewEarningsHistory,
   becomeDriver,
   approveDriver,
   rejectDriver,
+  suspendDriver,
+  unsuspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };
