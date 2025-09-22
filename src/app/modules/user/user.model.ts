@@ -29,7 +29,6 @@ const userSchema = new Schema<IUser>(
     role: { type: String, enum: Object.values(Role), default: Role.RIDER },
     auths: [authProvider],
     rides: [{ type: Schema.Types.ObjectId, ref: "Ride" }],
-    earnings: [{ type: Schema.Types.ObjectId, ref: "Ride" }],
   },
   {
     versionKey: false,

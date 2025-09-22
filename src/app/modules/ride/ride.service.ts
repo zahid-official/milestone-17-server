@@ -17,7 +17,7 @@ const getAllRequestedRides = async () => {
   return rides;
 };
 
-// View ride history (Rider only)
+// View rider's ride history (Rider only)
 const viewRideHistory = async (
   userId: string,
   query: Record<string, string>
@@ -260,7 +260,7 @@ const completeRide = async (rideId: string) => {
     }
   );
   await User.findByIdAndUpdate(ride.driverId, {
-    $push: { earnings: new mongoose.Types.ObjectId(ride._id) },
+    $push: { rides: new mongoose.Types.ObjectId(ride._id) },
   });
 
   return ride;

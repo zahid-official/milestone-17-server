@@ -51,11 +51,11 @@ const getSingleDriverApplication = async (driverId: string) => {
 
 // View earnings history (Driver only)
 const viewEarningsHistory = async (userId: string) => {
-  const user = await User.findById(userId).populate("earnings");
+  const user = await User.findById(userId).populate("rides");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
-  return user.earnings;
+  return user.rides;
 };
 
 // Application for becoming a driver
