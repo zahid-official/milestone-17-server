@@ -73,11 +73,11 @@ const becomeDriver = catchAsync(
   }
 );
 
-// Approve driver application
-const approveApplication = catchAsync(
+// Approve driver
+const approveDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const driverId = req?.params?.driverId;
-    const result = await driverService.approveApplication(driverId);
+    const result = await driverService.approveDriver(driverId);
 
     // Send response
     sendResponse(res, {
@@ -89,11 +89,11 @@ const approveApplication = catchAsync(
   }
 );
 
-// Reject driver application
-const rejectApplication = catchAsync(
+// Reject driver
+const rejectDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const driverId = req?.params?.driverId;
-    const result = await driverService.rejectApplication(driverId);
+    const result = await driverService.rejectDriver(driverId);
 
     // Send response
     sendResponse(res, {
@@ -187,8 +187,8 @@ const driverController = {
   getSingleDriverApplication,
   viewEarningsHistory,
   becomeDriver,
-  approveApplication,
-  rejectApplication,
+  approveDriver,
+  rejectDriver,
   suspendDriver,
   unsuspendDriver,
   updateDriverDetails,

@@ -111,11 +111,11 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
   return driver;
 };
 
-// Approve driver application
-const approveApplication = async (driverId: string) => {
+// Approve driver
+const approveDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
   if (driver.applicationStatus === ApplicationStatus.APPROVED) {
@@ -133,11 +133,11 @@ const approveApplication = async (driverId: string) => {
   return driver;
 };
 
-// Reject driver application
-const rejectApplication = async (driverId: string) => {
+// Reject driver
+const rejectDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
   if (driver.applicationStatus === ApplicationStatus.APPROVED) {
@@ -348,8 +348,8 @@ const driverService = {
   getSingleDriverApplication,
   viewEarningsHistory,
   becomeDriver,
-  approveApplication,
-  rejectApplication,
+  approveDriver,
+  rejectDriver,
   suspendDriver,
   unsuspendDriver,
   updateDriverDetails,
