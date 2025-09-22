@@ -39,15 +39,21 @@ router.post(
 
 // Patch routes
 router.patch(
-  "/approve/:driverId",
+  "/approveApplication/:driverId",
   validateToken(Role.ADMIN),
-  driverController.approveDriver
+  driverController.approveApplication
 );
 router.patch(
-  "/reject/:driverId",
+  "/rejectApplication/:driverId",
   validateToken(Role.ADMIN),
-  driverController.rejectDriver
+  driverController.rejectApplication
 );
+router.patch(
+  "/suspend/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.suspendDriver
+);
+
 router.patch(
   "/updateDetails/:driverId",
   validateToken(...Object.values(Role)),

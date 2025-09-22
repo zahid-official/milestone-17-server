@@ -32,7 +32,8 @@ passport.use(
         // Check if user is blocked or inactive
         if (
           user.accountStatus === AccountStatus.BLOCKED ||
-          user.accountStatus === AccountStatus.INACTIVE
+          user.accountStatus === AccountStatus.INACTIVE ||
+          user.accountStatus === AccountStatus.SUSPENDED
         ) {
           return done(null, false, {
             message: `User is ${user.accountStatus}. Please contact support for more information.`,

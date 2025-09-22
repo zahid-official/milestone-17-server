@@ -73,11 +73,11 @@ const becomeDriver = catchAsync(
   }
 );
 
-// Approve driver
-const approveDriver = catchAsync(
+// Approve driver application
+const approveApplication = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const driverId = req?.params?.driverId;
-    const result = await driverService.approveDriver(driverId);
+    const result = await driverService.approveApplication(driverId);
 
     // Send response
     sendResponse(res, {
@@ -89,17 +89,33 @@ const approveDriver = catchAsync(
   }
 );
 
-// Reject driver
-const rejectDriver = catchAsync(
+// Reject driver application
+const rejectApplication = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const driverId = req?.params?.driverId;
-    const result = await driverService.rejectDriver(driverId);
+    const result = await driverService.rejectApplication(driverId);
 
     // Send response
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Driver application rejected successfully",
+      data: result,
+    });
+  }
+);
+
+// Suspend driver
+const suspendDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.suspendDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver suspended successfully",
       data: result,
     });
   }
@@ -155,8 +171,9 @@ const driverController = {
   getSingleDriverApplication,
   viewEarningsHistory,
   becomeDriver,
-  approveDriver,
-  rejectDriver,
+  approveApplication,
+  rejectApplication,
+  suspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };

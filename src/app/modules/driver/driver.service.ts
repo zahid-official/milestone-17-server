@@ -3,7 +3,7 @@ import Driver from "./driver.model";
 import User from "../user/user.model";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
-import { Role } from "../user/user.interface";
+import { AccountStatus, Role } from "../user/user.interface";
 import QueryBuilder from "../../utils/queryBuilder";
 import {
   ApplicationStatus,
@@ -111,8 +111,8 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
   return driver;
 };
 
-// Approve driver
-const approveDriver = async (driverId: string) => {
+// Approve driver application
+const approveApplication = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
@@ -133,8 +133,8 @@ const approveDriver = async (driverId: string) => {
   return driver;
 };
 
-// Reject driver
-const rejectDriver = async (driverId: string) => {
+// Reject driver application
+const rejectApplication = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
@@ -160,6 +160,47 @@ const rejectDriver = async (driverId: string) => {
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.RIDER });
   return driver;
+};
+
+// Suspend driver
+const suspendDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can be suspended"
+    );
+  }
+
+  const user = await User.findById(driver.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
+  }
+
+  if (user.role !== Role.DRIVER) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "The associated user is not a driver"
+    );
+  }
+
+  if (user.accountStatus === "SUSPENDED") {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This driver is already suspended"
+    );
+  }
+
+  // Suspend the driver
+  user.accountStatus = AccountStatus.SUSPENDED;
+  await user.save();
+  driver.availability = AvailabilityStatus.OFFLINE;
+  await driver.save();
+  return null;
 };
 
 // Update driver details
@@ -266,8 +307,9 @@ const driverService = {
   getSingleDriverApplication,
   viewEarningsHistory,
   becomeDriver,
-  approveDriver,
-  rejectDriver,
+  approveApplication,
+  rejectApplication,
+  suspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };
