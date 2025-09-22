@@ -35,6 +35,7 @@ router.patch(
   validateSchema(updateUserZodSchema),
   userController.updateUser
 );
+router.patch("/block/:id", validateToken(Role.ADMIN), userController.blockUser);
 
 // Export user routes
 const userRoutes = router;
