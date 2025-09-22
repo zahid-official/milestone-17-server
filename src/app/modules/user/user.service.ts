@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
-import { IAuthProvider, IUser, Role } from "./user.interface";
+import { AccountStatus, IAuthProvider, IUser, Role } from "./user.interface";
 
 // Get all users
 const getAllUsers = async (query: Record<string, string>) => {
@@ -140,6 +140,40 @@ const updateUser = async (
   return data;
 };
 
+// Block user
+const blockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  // If user is already blocked, no need to block again
+  if (user.accountStatus === AccountStatus.BLOCKED) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is already blocked");
+  }
+
+  user.accountStatus = AccountStatus.BLOCKED;
+  await user.save();
+  return null;
+};
+
+// Unblock user
+const unblockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  // If user is already unblocked, no need to unblock again
+  if (user.accountStatus === AccountStatus.ACTIVE) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is already active");
+  }
+
+  user.accountStatus = AccountStatus.ACTIVE;
+  await user.save();
+  return null;
+};
+
 // User service object
 const userService = {
   getAllUsers,
@@ -147,6 +181,8 @@ const userService = {
   getProfileInfo,
   registerUser,
   updateUser,
+  blockUser,
+  unblockUser,
 };
 
 export default userService;

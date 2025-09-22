@@ -89,6 +89,38 @@ const updateUser = catchAsync(
   }
 );
 
+// Block user
+const blockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.params?.id;
+    const result = await userService.blockUser(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User blocked successfully",
+      data: result,
+    });
+  }
+);
+
+// Unblock user
+const unblockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.params?.id;
+    const result = await userService.unblockUser(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User unblocked successfully",
+      data: result,
+    });
+  }
+);
+
 // User controller object
 const userController = {
   getAllUsers,
@@ -96,6 +128,8 @@ const userController = {
   getProfileInfo,
   registerUser,
   updateUser,
+  blockUser,
+  unblockUser,
 };
 
 export default userController;

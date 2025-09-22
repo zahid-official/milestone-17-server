@@ -5,17 +5,77 @@ import httpStatus from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 
+// Get all rides (Admin only)
+const getAllRides = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const result = await rideService.getAllRides(
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All rides retrieved successfully",
+      data: result.data,
+      meta: result.meta,
+    });
+  }
+);
+
+// Get single rides (Admin only)
+const getSingleRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rideId = req?.params?.rideId;
+    const result = await rideService.getSingleRide(rideId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All rides retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await rideService.getAllRequestedRides();
+    const query = req?.query;
+    const result = await rideService.getAllRequestedRides(
+      query as Record<string, string>
+    );
 
     // Send response
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
       message: "Requested rides retrieved successfully",
-      data: result,
+      data: result.data,
+      meta: result.meta,
+    });
+  }
+);
+
+// View ride history (Rider only)
+const viewRideHistory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.viewRideHistory(
+      userId,
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride history retrieved successfully",
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -136,7 +196,10 @@ const completeRide = catchAsync(
 
 // Ride controller object
 const rideController = {
+  getAllRides,
+  getSingleRide,
   getAllRequestedRides,
+  viewRideHistory,
   requestRide,
   cancelRide,
   acceptRide,

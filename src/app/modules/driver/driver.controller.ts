@@ -18,7 +18,8 @@ const getAllDriverApplications = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "All driver applications retrieved successfully",
-      data: result,
+      data: result.data,
+      meta: result.meta,
     });
   }
 );
@@ -34,6 +35,23 @@ const getSingleDriverApplication = catchAsync(
       success: true,
       statusCode: httpStatus.OK,
       message: "Driver application retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+// View earnings history (Driver only)
+const viewEarningsHistory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const userId = req?.decodedToken?.userId;
+    const result = await driverService.viewEarningsHistory(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All driver applications retrieved successfully",
       data: result,
     });
   }
@@ -88,6 +106,38 @@ const rejectDriver = catchAsync(
   }
 );
 
+// Suspend driver
+const suspendDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.suspendDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver suspended successfully",
+      data: result,
+    });
+  }
+);
+
+// Unsuspend driver
+const unsuspendDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.unsuspendDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver unsuspended successfully",
+      data: result,
+    });
+  }
+);
+
 // Update driver details
 const updateDriverDetails = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -136,9 +186,12 @@ const availabilityStatus = catchAsync(
 const driverController = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  viewEarningsHistory,
   becomeDriver,
   approveDriver,
   rejectDriver,
+  suspendDriver,
+  unsuspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };
