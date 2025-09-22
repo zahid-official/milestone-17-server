@@ -157,6 +157,23 @@ const blockUser = async (userId: string) => {
   return null;
 };
 
+// Unblock user
+const unblockUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  // If user is already unblocked, no need to unblock again
+  if (user.accountStatus === AccountStatus.ACTIVE) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is already active");
+  }
+
+  user.accountStatus = AccountStatus.ACTIVE;
+  await user.save();
+  return null;
+};
+
 // User service object
 const userService = {
   getAllUsers,
@@ -165,6 +182,7 @@ const userService = {
   registerUser,
   updateUser,
   blockUser,
+  unblockUser,
 };
 
 export default userService;

@@ -105,6 +105,22 @@ const blockUser = catchAsync(
   }
 );
 
+// Unblock user
+const unblockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.params?.id;
+    const result = await userService.unblockUser(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User unblocked successfully",
+      data: result,
+    });
+  }
+);
+
 // User controller object
 const userController = {
   getAllUsers,
@@ -113,6 +129,7 @@ const userController = {
   registerUser,
   updateUser,
   blockUser,
+  unblockUser,
 };
 
 export default userController;
