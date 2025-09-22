@@ -193,6 +193,20 @@ const acceptRide = async (driverId: string, rideId: string) => {
     );
   }
 
+  // check if driver already accepted a ride and assign driverId
+  const existingRide = await Ride.findOne({
+    driverId: driverId,
+    status: {
+      $in: [RideStatus.ACCEPTED, RideStatus.PICKED_UP, RideStatus.IN_TRANSIT],
+    },
+  });
+  if (existingRide) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You have already accepted a ride. Please complete the current ride before accepting a new one."
+    );
+  }
+
   // Assign driver to the ride
   ride.driverId = new mongoose.Types.ObjectId(driverId);
 
