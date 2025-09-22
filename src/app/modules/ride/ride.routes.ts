@@ -10,6 +10,7 @@ const router = Router();
 
 // Get routes
 router.get("/", validateToken(Role.ADMIN), rideController.getAllRides);
+router.get("/:rideId", validateToken(Role.ADMIN), rideController.getSingleRide);
 router.get(
   "/requestedRides",
   validateToken(Role.ADMIN, Role.DRIVER),

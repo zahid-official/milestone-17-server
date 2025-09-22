@@ -32,6 +32,20 @@ const getAllRides = async (query: Record<string, string>) => {
   };
 };
 
+// Get single ride (Admin only)
+const getSingleRide = async (rideId: string) => {
+  const ride = await Ride.findById(rideId).populate(
+    "userId",
+    "name email phone"
+  );
+
+  if (!ride) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
+  }
+
+  return ride;
+};
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = async (query: Record<string, string>) => {
   // Define searchable fields
@@ -311,6 +325,7 @@ const completeRide = async (rideId: string) => {
 // Ride service object
 const rideService = {
   getAllRides,
+  getSingleRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,
