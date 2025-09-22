@@ -188,7 +188,7 @@ const suspendDriver = async (driverId: string) => {
     );
   }
 
-  if (user.accountStatus === "SUSPENDED") {
+  if (user.accountStatus === AccountStatus.SUSPENDED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "This driver is already suspended"
@@ -199,6 +199,47 @@ const suspendDriver = async (driverId: string) => {
   user.accountStatus = AccountStatus.SUSPENDED;
   await user.save();
   driver.availability = AvailabilityStatus.OFFLINE;
+  await driver.save();
+  return null;
+};
+
+// Unsuspend driver
+const unsuspendDriver = async (driverId: string) => {
+  const driver = await Driver.findById(driverId);
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Only approved drivers can be unsuspended"
+    );
+  }
+
+  const user = await User.findById(driver.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
+  }
+
+  if (user.role !== Role.DRIVER) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "The associated user is not a driver"
+    );
+  }
+
+  if (user.accountStatus === AccountStatus.ACTIVE) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This driver is already unsuspended"
+    );
+  }
+
+  // Suspend the driver
+  user.accountStatus = AccountStatus.ACTIVE;
+  await user.save();
+  driver.availability = AvailabilityStatus.ONLINE;
   await driver.save();
   return null;
 };
@@ -310,6 +351,7 @@ const driverService = {
   approveApplication,
   rejectApplication,
   suspendDriver,
+  unsuspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };

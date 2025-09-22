@@ -53,6 +53,11 @@ router.patch(
   validateToken(Role.ADMIN),
   driverController.suspendDriver
 );
+router.patch(
+  "/unsuspend/:driverId",
+  validateToken(Role.ADMIN),
+  driverController.unsuspendDriver
+);
 
 router.patch(
   "/updateDetails/:driverId",

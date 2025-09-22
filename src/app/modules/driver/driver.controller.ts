@@ -121,6 +121,22 @@ const suspendDriver = catchAsync(
   }
 );
 
+// Unsuspend driver
+const unsuspendDriver = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const driverId = req?.params?.driverId;
+    const result = await driverService.unsuspendDriver(driverId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Driver unsuspended successfully",
+      data: result,
+    });
+  }
+);
+
 // Update driver details
 const updateDriverDetails = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -174,6 +190,7 @@ const driverController = {
   approveApplication,
   rejectApplication,
   suspendDriver,
+  unsuspendDriver,
   updateDriverDetails,
   availabilityStatus,
 };
