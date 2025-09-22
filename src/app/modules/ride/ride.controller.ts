@@ -20,6 +20,26 @@ const getAllRequestedRides = catchAsync(
   }
 );
 
+// View ride history (Rider only)
+const viewRideHistory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.viewRideHistory(
+      userId,
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride history retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Request a ride
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -137,6 +157,7 @@ const completeRide = catchAsync(
 // Ride controller object
 const rideController = {
   getAllRequestedRides,
+  viewRideHistory,
   requestRide,
   cancelRide,
   acceptRide,

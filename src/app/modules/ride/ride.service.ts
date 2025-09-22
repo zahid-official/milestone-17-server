@@ -6,6 +6,7 @@ import httpStatus from "http-status-codes";
 import Driver from "../driver/driver.model";
 import AppError from "../../errors/AppError";
 import { IRide, RideStatus } from "./ride.interface";
+import QueryBuilder from "../../utils/queryBuilder";
 
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = async () => {
@@ -14,6 +15,36 @@ const getAllRequestedRides = async () => {
     "name email phone"
   );
   return rides;
+};
+
+// View ride history (Rider only)
+const viewRideHistory = async (
+  userId: string,
+  query: Record<string, string>
+) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "status"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ userId: userId }),
+    query
+  );
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("userId", "name email phone");
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+
+  return {
+    data: rides,
+    meta,
+  };
 };
 
 // Request a ride
@@ -235,6 +266,7 @@ const completeRide = async (rideId: string) => {
 // Ride service object
 const rideService = {
   getAllRequestedRides,
+  viewRideHistory,
   requestRide,
   cancelRide,
   acceptRide,

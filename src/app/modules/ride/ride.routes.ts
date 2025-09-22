@@ -14,6 +14,11 @@ router.get(
   validateToken(Role.ADMIN, Role.DRIVER),
   rideController.getAllRequestedRides
 );
+router.get(
+  "/history",
+  validateToken(Role.RIDER),
+  rideController.viewRideHistory
+);
 
 // Post routes
 router.post(
