@@ -49,6 +49,15 @@ const getSingleDriverApplication = async (driverId: string) => {
   return driver;
 };
 
+// View earnings history (Driver only)
+const viewEarningsHistory = async (userId: string) => {
+  const user = await User.findById(userId).populate("earnings");
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  return user.earnings;
+};
+
 // Application for becoming a driver
 const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
   const user = await User.findById(payload?.userId);
@@ -255,6 +264,7 @@ const availabilityStatus = async (
 const driverService = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  viewEarningsHistory,
   becomeDriver,
   approveDriver,
   rejectDriver,

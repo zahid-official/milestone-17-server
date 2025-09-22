@@ -39,6 +39,23 @@ const getSingleDriverApplication = catchAsync(
   }
 );
 
+// View earnings history (Driver only)
+const viewEarningsHistory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const userId = req?.decodedToken?.userId;
+    const result = await driverService.viewEarningsHistory(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All driver applications retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Apply for becoming a driver
 const becomeDriver = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -136,6 +153,7 @@ const availabilityStatus = catchAsync(
 const driverController = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  viewEarningsHistory,
   becomeDriver,
   approveDriver,
   rejectDriver,

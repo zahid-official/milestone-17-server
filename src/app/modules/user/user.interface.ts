@@ -37,4 +37,5 @@ export interface IUser {
   accountStatus?: AccountStatus;
   auths: IAuthProvider[];
   rides?: Types.ObjectId[];
+  earnings?: Types.ObjectId[];
 }

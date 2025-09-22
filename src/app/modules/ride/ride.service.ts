@@ -93,7 +93,7 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
   // Create ride and add ride reference to user
   const ride = await Ride.create(payload);
   await User.findByIdAndUpdate(payload.userId, {
-    $push: { rides: ride._id },
+    $push: { rides: new mongoose.Types.ObjectId(ride._id) },
   });
   return ride;
 };
@@ -256,9 +256,12 @@ const completeRide = async (rideId: string) => {
   await Driver.findOneAndUpdate(
     { userId: ride.driverId },
     {
-      $push: { rides: ride._id },
+      $push: { completedRides: new mongoose.Types.ObjectId(ride._id) },
     }
   );
+  await User.findByIdAndUpdate(ride.driverId, {
+    $push: { earnings: new mongoose.Types.ObjectId(ride._id) },
+  });
 
   return ride;
 };

@@ -23,6 +23,11 @@ router.get(
   validateToken(Role.ADMIN),
   driverController.getSingleDriverApplication
 );
+router.get(
+  "/earinging",
+  validateToken(Role.DRIVER),
+  driverController.viewEarningsHistory
+);
 
 // Post routes
 router.post(
