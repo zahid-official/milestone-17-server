@@ -45,16 +45,16 @@ secure authentication, and comprehensive administrative controls.</p>
     <td width="50%">
       
 ### 🔐 Authentication & Security
-- **JWT-based Authentication** with refresh token rotation
-- **Role-based Access Control** with granular permissions
-- **Advanced Password Security** using bcrypt encryption
+- **JWT-based Authentication** with refresh token
+- **Role-based Access Control** with permissions
+- **Password Security** using bcrypt encryption
 - **Two-Factor Authentication** via OTP verification
 - **Session Management** with Redis caching
       
 ### 🚗 Ride Management
 - **Complete Lifecycle Management** from request to completion
 - **Real-time Status Tracking** with live updates
-- **Geolocation Services** for accurate pickup/dropoff
+- **Geolocation Services** for pickup/dropoff
 - **Smart Driver Matching** algorithm
 - **Dynamic Pricing** calculation system
       
@@ -65,7 +65,7 @@ secure authentication, and comprehensive administrative controls.</p>
 - **User & Driver Management** dashboard
 - **Verification Workflows** for driver applications
 - **Analytics & Reporting** with detailed insights
-- **Account Management** including suspension controls
+- **Account Management** including suspension
 - **Regulatory Compliance Monitoring**
 - **Dispute Resolution** system
       
