@@ -86,7 +86,7 @@ secure authentication, and comprehensive administrative controls.</p>
 ```mermaid
 graph TB
     subgraph "Client Layer"
-        A[Mobile App]
+        A[Mobile Application]
         B[Web Application]
         C[Admin Dashboard]
     end
