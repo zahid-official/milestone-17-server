@@ -80,7 +80,7 @@ const viewRideHistory = catchAsync(
   }
 );
 
-// Request a ride
+// Request a ride (Rider only)
 const requestRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req?.body;
@@ -97,11 +97,12 @@ const requestRide = catchAsync(
   }
 );
 
-// Cancel a ride
+// Cancel a ride (Rider only)
 const cancelRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
-    const result = await rideService.cancelRide(rideId);
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.cancelRide(userId, rideId);
 
     // Send response
     sendResponse(res, {
@@ -113,7 +114,7 @@ const cancelRide = catchAsync(
   }
 );
 
-// Accept a ride
+// Accept a ride (Driver only)
 const acceptRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
@@ -130,11 +131,12 @@ const acceptRide = catchAsync(
   }
 );
 
-// Reject a ride
+// Reject a ride (Driver only)
 const rejectRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
-    const result = await rideService.rejectRide(rideId);
+    const driverId = req?.decodedToken?.userId;
+    const result = await rideService.rejectRide(driverId, rideId);
 
     // Send response
     sendResponse(res, {
@@ -146,7 +148,7 @@ const rejectRide = catchAsync(
   }
 );
 
-// Pick up a rider
+// Pick up a rider (Driver only)
 const pickUpRider = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
@@ -162,7 +164,7 @@ const pickUpRider = catchAsync(
   }
 );
 
-// Ride in transit
+// Ride in transit (Driver only)
 const inTransitRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
@@ -178,7 +180,7 @@ const inTransitRide = catchAsync(
   }
 );
 
-// Complete a ride
+// Complete a ride (Driver only)
 const completeRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;

@@ -142,11 +142,11 @@ const unsuspendDriver = catchAsync(
 const updateDriverDetails = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req?.body;
-    const userId = req?.decodedToken?.userId;
+    const decodedToken = req.decodedToken;
     const driverId = req?.params?.driverId;
     const result = await driverService.updateDriverDetails(
-      userId,
       driverId,
+      decodedToken,
       body
     );
 

@@ -99,11 +99,11 @@ const updateUser = async (
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  // Prevent modification of super admin account by non-super admin users
+  // Prevent modification of admin account by non-super admin users
   if (isUserExists?.role === Role.ADMIN && decodedToken.role !== Role.ADMIN) {
     throw new AppError(
       httpStatus.FORBIDDEN,
-      "You don't have permission to modify super admin account"
+      "You don't have permission to modify admin account"
     );
   }
 
@@ -113,7 +113,7 @@ const updateUser = async (
   ) {
     throw new AppError(
       httpStatus.FORBIDDEN,
-      "You don't have permission to change role"
+      "You don't have permission to change role. Only admin can change role"
     );
   }
 

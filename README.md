@@ -15,7 +15,7 @@
     Enterprise-Grade Transportation Backend Solution
   </h2>
   <p><strong>Built with passion, designed for scale</strong></p>
-  <p>**Velocia** is a production-ready, scalable backend API for modern ride-sharing
+  <p><strong>Velocia</strong> is a production-ready, scalable backend API for modern ride-sharing
 platforms. Built with cutting-edge technologies and best practices, it provides
 a robust foundation for transportation applications with real-time capabilities,
 secure authentication, and comprehensive administrative controls.</p>

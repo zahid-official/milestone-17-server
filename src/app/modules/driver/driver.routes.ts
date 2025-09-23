@@ -19,12 +19,12 @@ router.get(
   driverController.getAllDriverApplications
 );
 router.get(
-  "/:driverId",
+  "/singleDriver/:driverId",
   validateToken(Role.ADMIN),
   driverController.getSingleDriverApplication
 );
 router.get(
-  "/earinging",
+  "/earning",
   validateToken(Role.DRIVER),
   driverController.viewEarningsHistory
 );
@@ -61,7 +61,7 @@ router.patch(
 
 router.patch(
   "/updateDetails/:driverId",
-  validateToken(...Object.values(Role)),
+  validateToken(Role.ADMIN, Role.DRIVER),
   validateSchema(updateDriverDetailsZodSchema),
   driverController.updateDriverDetails
 );

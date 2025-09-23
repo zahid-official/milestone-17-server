@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Driver from "./driver.model";
 import User from "../user/user.model";
+import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
-import { AccountStatus, Role } from "../user/user.interface";
 import QueryBuilder from "../../utils/queryBuilder";
+import { AccountStatus, Role } from "../user/user.interface";
 import {
   ApplicationStatus,
   AvailabilityStatus,
@@ -246,8 +247,8 @@ const unsuspendDriver = async (driverId: string) => {
 
 // Update driver details
 const updateDriverDetails = async (
-  userId: string,
   driverId: string,
+  decodedToken: JwtPayload,
   payload: Partial<IDriver>
 ) => {
   const driver = await Driver.findById(driverId);
@@ -255,7 +256,10 @@ const updateDriverDetails = async (
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (userId !== driver.userId.toString()) {
+  if (
+    decodedToken.role === Role.DRIVER &&
+    decodedToken.userId !== driver.userId.toString()
+  ) {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to update this driver details"

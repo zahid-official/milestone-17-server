@@ -103,7 +103,7 @@ const viewRideHistory = async (
   };
 };
 
-// Request a ride
+// Request a ride (Rider only)
 const requestRide = async (userId: string, payload: Partial<IRide>) => {
   if (userId !== payload?.userId?.toString()) {
     throw new AppError(
@@ -154,12 +154,20 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
   return ride;
 };
 
-// Cancel a ride
-const cancelRide = async (rideId: string) => {
+// Cancel a ride (Rider only)
+const cancelRide = async (userId: string, rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
   }
+
+  if (userId !== ride.userId.toString()) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "You are not authorized to cancel this ride. You can only cancel your own rides."
+    );
+  }
+
   if (ride.status !== RideStatus.REQUESTED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -179,7 +187,7 @@ const cancelRide = async (rideId: string) => {
   return ride;
 };
 
-// Accept a ride
+// Accept a ride (Driver only)
 const acceptRide = async (driverId: string, rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
@@ -222,8 +230,8 @@ const acceptRide = async (driverId: string, rideId: string) => {
   return ride;
 };
 
-// Reject a ride
-const rejectRide = async (rideId: string) => {
+// Reject a ride (Driver only)
+const rejectRide = async (driverId: string, rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
@@ -233,6 +241,20 @@ const rejectRide = async (rideId: string) => {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "Only rides with status 'REQUESTED' can be rejected"
+    );
+  }
+
+  // check if driver already accepted a ride and assign driverId
+  const existingRide = await Ride.findOne({
+    driverId: driverId,
+    status: {
+      $in: [RideStatus.ACCEPTED, RideStatus.PICKED_UP, RideStatus.IN_TRANSIT],
+    },
+  });
+  if (existingRide) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You have already accepted a ride. Please complete the current ride before rejecting a new one."
     );
   }
 
@@ -248,7 +270,7 @@ const rejectRide = async (rideId: string) => {
   return ride;
 };
 
-// Pick up a rider
+// Pick up a rider (Driver only)
 const pickUpRider = async (rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
@@ -274,7 +296,7 @@ const pickUpRider = async (rideId: string) => {
   return ride;
 };
 
-// Ride in transit
+// Ride in transit (Driver only)
 const inTransitRide = async (rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
@@ -300,7 +322,7 @@ const inTransitRide = async (rideId: string) => {
   return ride;
 };
 
-// Complete a ride
+// Complete a ride (Driver only)
 const completeRide = async (rideId: string) => {
   const ride = await Ride.findById(rideId);
   if (!ride) {
