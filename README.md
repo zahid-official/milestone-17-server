@@ -300,7 +300,7 @@ Production: https://velocia-api.vercel.app/api/v1
 ### **📋 API Endpoints**
 
 <details>
-<summary><b>🔐 Authentication Routes</b></summary>
+<summary><b>🔐 Click to view Authentication Routes</b></summary>
 
 | HTTP Method | Endpoint                 | Description                                   | Authentication Required |
 | ----------- | ------------------------ | --------------------------------------------- | ----------------------- |
@@ -316,7 +316,7 @@ Production: https://velocia-api.vercel.app/api/v1
 </details>
 
 <details>
-<summary><b>👤 User Management Routes</b></summary>
+<summary><b>👤 Click to view User Management Routes</b></summary>
 
 | HTTP Method | Endpoint               | Description                               | Authentication Required |
 | ----------- | ---------------------- | ----------------------------------------- | ----------------------- |
@@ -331,7 +331,7 @@ Production: https://velocia-api.vercel.app/api/v1
 </details>
 
 <details>
-<summary><b>🚕 Driver Management Routes</b></summary>
+<summary><b>🚕 Click to view Driver Management Routes</b></summary>
 
 | HTTP Method | Endpoint                          | Description                          | Authentication Required |
 | ----------- | --------------------------------- | ------------------------------------ | ----------------------- |
@@ -349,7 +349,7 @@ Production: https://velocia-api.vercel.app/api/v1
 </details>
 
 <details>
-<summary><b>🏍️ Ride Management Routes</b></summary>
+<summary><b>🏍️ Click to view Ride Management Routes</b></summary>
 
 | HTTP Method | Endpoint                   | Description                            | Authentication Required |
 | ----------- | -------------------------- | -------------------------------------- | ----------------------- |
