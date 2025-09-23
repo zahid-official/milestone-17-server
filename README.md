@@ -87,13 +87,12 @@ secure authentication, and comprehensive administrative controls.</p>
 graph TB
     subgraph "Client Layer"
         A[Mobile App]
-        B[Web App]
+        B[Web Application]
         C[Admin Dashboard]
     end
 
     subgraph "API Gateway"
         D[Load Balancer]
-        E[Rate Limiter]
         F[API Router]
     end
 
@@ -112,7 +111,7 @@ graph TB
     end
 
     A & B & C --> D
-    D --> E --> F
+    D --> F
     F --> G & H & I & J & K
     G & H & I & J & K --> L
     G & H & I & J & K --> M
@@ -305,14 +304,14 @@ Production: https://velocia-api.vercel.app/api/v1
 
 | HTTP Method | Endpoint                 | Description                                   | Authentication Required |
 | ----------- | ------------------------ | --------------------------------------------- | ----------------------- |
+| `GET`       | `/auth/regenerate-token` | Generate new access token using refresh token | No                      |
 | `POST`      | `/auth/login`            | Authenticate user with credentials            | No                      |
 | `POST`      | `/auth/logout`           | Invalidate current user session               | No                      |
-| `GET`       | `/auth/regenerate-token` | Generate new access token using refresh token | No                      |
 | `POST`      | `/auth/sendOTP`          | Send OTP for verification purposes            | No                      |
 | `POST`      | `/auth/verifyOTP`        | Verify OTP code for authentication            | No                      |
-| `PATCH`     | `/auth/change-password`  | Update user password                          | Yes (Any Role)          |
 | `PATCH`     | `/auth/forgot-password`  | Initiate password reset process               | No                      |
 | `PATCH`     | `/auth/reset-password`   | Complete password reset with verification     | Yes (Any Role)          |
+| `PATCH`     | `/auth/change-password`  | Update user password                          | Yes (Any Role)          |
 
 </details>
 
@@ -321,11 +320,11 @@ Production: https://velocia-api.vercel.app/api/v1
 
 | HTTP Method | Endpoint               | Description                               | Authentication Required |
 | ----------- | ---------------------- | ----------------------------------------- | ----------------------- |
-| `POST`      | `/user/register`       | Create new user account                   | No                      |
-| `GET`       | `/user/profile`        | Retrieve current user profile information | Yes (Any Role)          |
-| `PATCH`     | `/user/update/:id`     | Update user account information           | Yes (Owner/Admin)       |
 | `GET`       | `/user/`               | Retrieve all registered users             | Yes (Admin Only)        |
 | `GET`       | `/user/singleUser/:id` | Retrieve specific user by ID              | Yes (Admin Only)        |
+| `GET`       | `/user/profile`        | Retrieve current user profile information | Yes (Any Role)          |
+| `POST`      | `/user/register`       | Create new user account                   | No                      |
+| `PATCH`     | `/user/update/:id`     | Update user account information           | Yes (Owner/Admin)       |
 | `PATCH`     | `/user/block/:id`      | Block user account                        | Yes (Admin Only)        |
 | `PATCH`     | `/user/unblock/:id`    | Unblock user account                      | Yes (Admin Only)        |
 
@@ -336,16 +335,16 @@ Production: https://velocia-api.vercel.app/api/v1
 
 | HTTP Method | Endpoint                          | Description                          | Authentication Required |
 | ----------- | --------------------------------- | ------------------------------------ | ----------------------- |
-| `POST`      | `/driver/apply`                   | Submit driver application            | Yes (Any Role)          |
-| `GET`       | `/driver/earnings`                | View driver earnings history         | Yes (Driver Only)       |
-| `PATCH`     | `/driver/availability/:driverId`  | Update driver availability status    | Yes (Driver Only)       |
-| `PATCH`     | `/driver/updateDetails/:driverId` | Update driver account details        | Yes (Owner/Admin)       |
 | `GET`       | `/driver/`                        | Retrieve all driver applications     | Yes (Admin Only)        |
-| `GET`       | `/driver/:driverId`               | Retrieve specific driver information | Yes (Admin Only)        |
+| `GET`       | `/driver/singleDriver/:driverId`  | Retrieve specific driver information | Yes (Admin Only)        |
+| `GET`       | `/driver/earnings`                | View driver earnings history         | Yes (Driver Only)       |
+| `POST`      | `/driver/apply`                   | Submit driver application            | Yes (Any Role)          |
+| `PATCH`     | `/driver/updateDetails/:driverId` | Update driver account details        | Yes (Owner/Admin)       |
 | `PATCH`     | `/driver/approve/:driverId`       | Approve driver application           | Yes (Admin Only)        |
 | `PATCH`     | `/driver/reject/:driverId`        | Reject driver application            | Yes (Admin Only)        |
 | `PATCH`     | `/driver/suspend/:driverId`       | Suspend driver account               | Yes (Admin Only)        |
 | `PATCH`     | `/driver/unsuspend/:driverId`     | Reactivate suspended driver account  | Yes (Admin Only)        |
+| `PATCH`     | `/driver/availability/:driverId`  | Update driver availability status    | Yes (Driver Only)       |
 
 </details>
 
@@ -354,17 +353,17 @@ Production: https://velocia-api.vercel.app/api/v1
 
 | HTTP Method | Endpoint                   | Description                            | Authentication Required |
 | ----------- | -------------------------- | -------------------------------------- | ----------------------- |
-| `POST`      | `/ride/request`            | Request a new ride                     | Yes (Rider Only)        |
-| `GET`       | `/ride/history`            | Retrieve rider's complete ride history | Yes (Rider Only)        |
-| `PATCH`     | `/ride/cancel/:rideId`     | Cancel pending ride request            | Yes (Rider Only)        |
+| `GET`       | `/ride/`                   | Retrieve all platform rides            | Yes (Admin Only)        |
+| `GET`       | `/ride/singleRide/:rideId` | Retrieve specific ride details         | Yes (Admin Only)        |
 | `GET`       | `/ride/requestedRides`     | View available ride requests           | Yes (Driver/Admin)      |
+| `GET`       | `/ride/history`            | Retrieve rider's complete ride history | Yes (Rider Only)        |
+| `POST`      | `/ride/request`            | Request a new ride                     | Yes (Rider Only)        |
+| `PATCH`     | `/ride/cancel/:rideId`     | Cancel pending ride request            | Yes (Rider Only)        |
 | `PATCH`     | `/ride/accept/:rideId`     | Accept ride request                    | Yes (Driver Only)       |
 | `PATCH`     | `/ride/reject/:rideId`     | Reject ride request                    | Yes (Driver Only)       |
 | `PATCH`     | `/ride/pickUp/:rideId`     | Confirm rider pickup                   | Yes (Driver Only)       |
 | `PATCH`     | `/ride/inTransit/:rideId`  | Update ride status to in transit       | Yes (Driver Only)       |
 | `PATCH`     | `/ride/complete/:rideId`   | Mark ride as completed                 | Yes (Driver Only)       |
-| `GET`       | `/ride/`                   | Retrieve all platform rides            | Yes (Admin Only)        |
-| `GET`       | `/ride/singleRide/:rideId` | Retrieve specific ride details         | Yes (Admin Only)        |
 
 </details>
 
@@ -380,7 +379,7 @@ All API responses follow this consistent structure:
   "statusCode": 200,
   "message": "Operation completed successfully",
   "data": {
-    // Response payload
+     "Response payload"
   },
   "meta": {
     "page": 2,
@@ -491,13 +490,6 @@ Drivers are service providers with specialized tools for ride fulfillment:
 - Resource-level access control for sensitive operations
 - Dynamic permission validation for all protected endpoints
 - Inheritance-based permission structure for scalability
-
-**Request Security**
-
-- Comprehensive input validation using Zod schemas
-- SQL injection prevention through parameterized queries
-- Cross-Site Scripting (XSS) protection with input sanitization
-- Rate limiting to prevent abuse and DDoS attacks
 
 ### Data Protection
 
@@ -653,7 +645,7 @@ vercel --prod
   </a>
   
   <h3>Zahid Official</h3>
-  <p><b>Full Stack Developer | Open Source Enthusiast</b></p>
+  <p><b>Web Developer | Tech Enthusiast</b></p>
   
   [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/zahid-official)
   [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/zahid-web)
