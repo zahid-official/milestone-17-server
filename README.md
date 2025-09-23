@@ -247,7 +247,7 @@ NODE_ENV=development | production
 PORT=5000
 
 # Database Configuration
-DB_URL=mongodb+srv://username:password@cluster.mongodb.net/zvelociaDB?retryWrites=true&w=majority&appName=Cluster1
+DB_URL=mongodb+srv://username:password@cluster.mongodb.net/velociaDB?retryWrites=true&w=majority&appName=Cluster1
 # OR Local MongoDB
 # DB_URL=mongodb://localhost:27017/velociaDB
 
