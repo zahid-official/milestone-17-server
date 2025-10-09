@@ -79,8 +79,8 @@ const logout = catchAsync(
 // Account verification via OTP
 const sendOTP = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { name, email } = req.body;
-    const result = await authService.sendOTP(name, email);
+    const email = req?.body?.email;
+    const result = await authService.sendOTP(email);
 
     // Send response
     sendResponse(res, {
