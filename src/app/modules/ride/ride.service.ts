@@ -124,10 +124,6 @@ const requestRide = async (userId: string, payload: Partial<IRide>) => {
     );
   }
 
-  if (payload.distance) {
-    payload.fare = payload.distance * 5;
-  }
-
   const rideRequest = await Ride.find({
     userId: payload.userId,
     status: {

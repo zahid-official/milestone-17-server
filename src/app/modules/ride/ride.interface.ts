@@ -20,6 +20,11 @@ export interface ITimestamp {
   completedAt?: Date;
 }
 
+export enum PaymentMethod {
+  CASH = "CASH",
+  ONLINE = "ONLINE",
+}
+
 export interface IRide {
   userId: Types.ObjectId;
   driverId?: Types.ObjectId;
@@ -29,6 +34,7 @@ export interface IRide {
   destination: string;
 
   fare?: number;
+  paymentMethod?: PaymentMethod;
   status: RideStatus;
   timestamps?: ITimestamp;
 }
