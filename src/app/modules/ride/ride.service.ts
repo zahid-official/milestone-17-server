@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Ride from "./ride.model";
-import mongoose from "mongoose";
-import User from "../user/user.model";
 import httpStatus from "http-status-codes";
-import Driver from "../driver/driver.model";
+import mongoose from "mongoose";
 import AppError from "../../errors/AppError";
-import { IRide, RideStatus } from "./ride.interface";
 import QueryBuilder from "../../utils/queryBuilder";
+import Driver from "../driver/driver.model";
+import User from "../user/user.model";
+import { IDriverUser, IRide, RideStatus } from "./ride.interface";
+import Ride from "./ride.model";
 
 // Get all rides (Admin only)
 const getAllRides = async (query: Record<string, string>) => {
@@ -92,13 +92,29 @@ const viewRideHistory = async (
     .fieldSelect()
     .search(searchFields)
     .build()
-    .populate("userId", "name email phone");
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await Driver.findOne({ userId: ride.driverId })
+        .select("-applicationStatus -completedRides -createdAt -updatedAt")
+        .populate<{ userId: IDriverUser }>("userId", "name email phone")
+        .lean();
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
+  );
 
   // Get meta data for pagination
   const meta = await queryBuilder.meta();
-
   return {
-    data: rides,
+    data: ridesData,
     meta,
   };
 };
