@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IRide, ITimestamp, RideStatus } from "./ride.interface";
+import { IRide, ITimestamp, PaymentMethod, RideStatus } from "./ride.interface";
 
 // Define timestamps schema
 const timestampsSchema = new Schema<ITimestamp>(
@@ -26,6 +26,11 @@ const rideSchema = new Schema<IRide>(
     destination: { type: String, required: true },
 
     fare: { type: Number },
+    paymentMethod: {
+      type: String,
+      enum: Object.values(PaymentMethod),
+      default: PaymentMethod.CASH,
+    },
     timestamps: timestampsSchema,
     status: {
       type: String,

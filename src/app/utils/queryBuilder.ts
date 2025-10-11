@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-dynamic-delete */
 
 import { Query } from "mongoose";
@@ -6,9 +7,9 @@ import { excludeFields } from "./contants";
 class QueryBuilder<T> {
   // Class properties
   public modelQuery: Query<T[], T>;
-  public readonly query: Record<string, string>;
+  public readonly query: Record<string, any>;
 
-  constructor(modelQuery: Query<T[], T>, query: Record<string, string>) {
+  constructor(modelQuery: Query<T[], T>, query: Record<string, any>) {
     // Assign the parameters to class properties
     this.modelQuery = modelQuery;
     this.query = query;
@@ -17,7 +18,27 @@ class QueryBuilder<T> {
   // Method to filter the query results
   filter(): this {
     const filter = { ...this.query };
+
+    // Remove fields that shouldn't be treated as filters
     excludeFields?.forEach((field) => delete filter[field]);
+
+    // Extract fare filtering parameters
+    const minFare = this.query?.minFare ? Number(this.query.minFare) : null;
+    const maxFare = this.query?.maxFare ? Number(this.query.maxFare) : null;
+
+    // Build fare filter if any fare-related query param exists
+    if (minFare !== null || maxFare !== null) {
+      filter["fare"] = {};
+
+      if (minFare !== null) {
+        filter["fare"]["$gte"] = minFare;
+      }
+
+      if (maxFare !== null) {
+        filter["fare"]["$lte"] = maxFare;
+      }
+    }
+
     this.modelQuery = this.modelQuery.find(filter);
     return this;
   }
