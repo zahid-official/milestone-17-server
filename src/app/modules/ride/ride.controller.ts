@@ -24,7 +24,7 @@ const getAllRides = catchAsync(
   }
 );
 
-// Get single rides (Admin only)
+// Get single rides
 const getSingleRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
@@ -34,7 +34,7 @@ const getSingleRide = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "All rides retrieved successfully",
+      message: "Ride Details retrieved successfully",
       data: result,
     });
   }

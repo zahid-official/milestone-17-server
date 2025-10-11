@@ -32,18 +32,30 @@ const getAllRides = async (query: Record<string, string>) => {
   };
 };
 
-// Get single ride (Admin only)
+// Get single ride
 const getSingleRide = async (rideId: string) => {
-  const ride = await Ride.findById(rideId).populate(
-    "userId",
-    "name email phone"
-  );
+  // Get the ride and populate rider info
+  const ride = await Ride.findById(rideId)
+    .populate("userId", "name email phone")
+    .lean<IRide | null>();
 
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
   }
 
-  return ride;
+  // Get driver info if driverId exists
+  let driverInfo = null;
+  if (ride.driverId) {
+    driverInfo = await Driver.findOne({ userId: ride.driverId })
+      .select("-applicationStatus -completedRides -createdAt -updatedAt")
+      .populate<{ userId: IDriverUser }>("userId", "name email phone")
+      .lean();
+  }
+
+  return {
+    ...ride,
+    driverInfo: driverInfo || null,
+  };
 };
 
 // Get all requested rides (Admin and Driver only)
