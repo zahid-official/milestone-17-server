@@ -15,6 +15,7 @@ router.get(
   validateToken(...Object.values(Role)),
   rideController.getSingleRide
 );
+router.get("/activeRide", validateToken(Role.RIDER), rideController.activeRide);
 router.get(
   "/requestedRides",
   validateToken(Role.ADMIN, Role.DRIVER),

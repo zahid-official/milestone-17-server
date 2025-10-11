@@ -58,6 +58,16 @@ const getSingleRide = async (rideId: string) => {
   };
 };
 
+// Get active ride
+const activeRide = async () => {
+  const ride = await Ride.findOne({
+    status: {
+      $nin: [RideStatus.COMPLETED, RideStatus.CANCELLED, RideStatus.REJECTED],
+    },
+  });
+  return ride;
+};
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = async (query: Record<string, string>) => {
   // Define searchable fields
@@ -386,6 +396,7 @@ const completeRide = async (rideId: string) => {
 const rideService = {
   getAllRides,
   getSingleRide,
+  activeRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,

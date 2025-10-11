@@ -40,6 +40,21 @@ const getSingleRide = catchAsync(
   }
 );
 
+// Get active ride (Rider only)
+const activeRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await rideService.activeRide();
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Active ride details retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -200,6 +215,7 @@ const completeRide = catchAsync(
 const rideController = {
   getAllRides,
   getSingleRide,
+  activeRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,
