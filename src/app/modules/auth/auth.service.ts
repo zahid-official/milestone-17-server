@@ -61,7 +61,7 @@ const regenerateAccessToken = async (refreshToken: string) => {
 };
 
 // Account verification via OTP
-const sendOTP = async (name: string, email: string) => {
+const sendOTP = async (email: string) => {
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -91,7 +91,6 @@ const sendOTP = async (name: string, email: string) => {
     subject: "OTP code for account verification",
     templateName: "sendOtp",
     templateData: {
-      name: name,
       otpCode: otp,
       companyName: "Velocia",
       expiryTime: "2 minutes",

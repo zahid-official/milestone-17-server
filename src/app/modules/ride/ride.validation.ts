@@ -1,4 +1,5 @@
 import z from "zod";
+import { PaymentMethod } from "./ride.interface";
 import { Types } from "mongoose";
 
 // Zod scheme for ride request validation
@@ -25,7 +26,6 @@ export const rideRequestZodSchema = z.object({
           : "Pickup must be a string",
     })
     .min(2, { error: "Pickup must be at least 2 characters long." })
-    .max(50, { error: "Pickup cannot exceed 50 characters." })
     .trim(),
 
   // Destination
@@ -37,7 +37,6 @@ export const rideRequestZodSchema = z.object({
           : "Destination must be a string",
     })
     .min(2, { error: "Destination must be at least 2 characters long." })
-    .max(50, { error: "Destination cannot exceed 50 characters." })
     .trim(),
 
   // Distance
@@ -49,4 +48,17 @@ export const rideRequestZodSchema = z.object({
           : "Distance must be a number",
     })
     .min(1, "Distance must be a positive integer"),
+
+  // Fare
+  fare: z
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Fare is required"
+          : "Fare must be a number",
+    })
+    .min(1, "Distance must be a positive integer"),
+
+  // Payment Method
+  paymentMethod: z.enum(Object.values(PaymentMethod) as [string]),
 });
