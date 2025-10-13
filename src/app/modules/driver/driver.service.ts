@@ -30,7 +30,7 @@ const getAllDriverApplications = async (query: Record<string, string>) => {
     .fieldSelect()
     .search(searchFields)
     .build()
-    .populate("userId", "name email phone role");
+    .populate("userId", "name email phone role accountStatus");
 
   // Get meta data for pagination
   const meta = await queryBuilder.meta();
