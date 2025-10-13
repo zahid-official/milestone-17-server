@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { AvailabilityStatus, IVehicle } from "../driver/driver.interface";
 
 // Defines user roles
 export enum Role {
@@ -37,4 +38,8 @@ export interface IUser {
   accountStatus?: AccountStatus;
   auths: IAuthProvider[];
   rides?: Types.ObjectId[];
+
+  licenseNumber?: string;
+  vehicleInfo?: IVehicle;
+  availability?: AvailabilityStatus;
 }

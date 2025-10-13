@@ -1,5 +1,38 @@
 import z from "zod";
 import { AccountStatus, Role } from "./user.interface";
+import { VehicleType } from "../driver/driver.interface";
+
+// Vehicle schema
+const VehicleSchema = z.object({
+  // Vehicle Type
+  vehicleType: z.enum(Object.values(VehicleType)).optional(),
+
+  // Vehicle Model
+  vehicleModel: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Model is required"
+          : "Model must be a string",
+    })
+    .min(2, { error: "Model must be at least 2 characters long." })
+    .max(50, { error: "Model cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+
+  // Vehicle Plate Number
+  plateNumber: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "Plate Number is required"
+          : "Plate Number must be a string",
+    })
+    .min(2, { error: "Plate Number must be at least 2 characters long." })
+    .max(50, { error: "Plate Number cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+});
 
 // Zod scheme for new user registration
 export const registerUserZodSchema = z.object({
@@ -48,6 +81,22 @@ export const registerUserZodSchema = z.object({
       error: "Password must contain at least 1 number.",
     })
     .trim(),
+
+  // License Number
+  licenseNumber: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "License number is required"
+          : "License number must be a string",
+    })
+    .min(2, { error: "License number must be at least 2 characters long." })
+    .max(50, { error: "License number cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+
+  // Vehicle Info
+  vehicleInfo: VehicleSchema.optional(),
 });
 
 // Zod scheme for updating user data
@@ -90,4 +139,20 @@ export const updateUserZodSchema = z.object({
 
   // Account status
   accountStatus: z.enum(Object.values(AccountStatus) as [string]).optional(),
+
+  // License Number
+  licenseNumber: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined
+          ? "License number is required"
+          : "License number must be a string",
+    })
+    .min(2, { error: "License number must be at least 2 characters long." })
+    .max(50, { error: "License number cannot exceed 50 characters." })
+    .trim()
+    .optional(),
+
+  // Vehicle Info
+  vehicleInfo: VehicleSchema.optional(),
 });

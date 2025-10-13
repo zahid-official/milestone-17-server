@@ -64,6 +64,11 @@ const registerUser = async (payload: Partial<IUser>) => {
     providerId: email as string, // Using email as providerId for credentials
   };
 
+  // If vehicleInfo is provided, set role to DRIVER
+  if (rest?.vehicleInfo) {
+    rest.role = Role.DRIVER;
+  }
+
   const user = await User.create({
     email,
     password: hashedPassword,

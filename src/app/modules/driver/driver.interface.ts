@@ -13,13 +13,6 @@ export interface IVehicle {
   plateNumber: string;
 }
 
-// Defines driver application status
-export enum ApplicationStatus {
-  PENDING = "PENDING",
-  APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
-}
-
 // Defines driver availability
 export enum AvailabilityStatus {
   ONLINE = "ONLINE",
@@ -34,5 +27,4 @@ export interface IDriver {
   vehicleInfo: IVehicle;
   completedRides?: Types.ObjectId[];
   availability?: AvailabilityStatus;
-  applicationStatus?: ApplicationStatus;
 }
