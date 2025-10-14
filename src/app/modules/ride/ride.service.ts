@@ -126,6 +126,7 @@ const viewRideHistory = async (
   const rides = await queryBuilder
     .sort()
     .filter()
+    .dateRangeFilter()
     .paginate()
     .fieldSelect()
     .search(searchFields)
