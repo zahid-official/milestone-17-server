@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IVehicle } from "../user/user.interface";
+import { IVehicle, VehicleType } from "../user/user.interface";
 
 export enum RideStatus {
   REQUESTED = "REQUESTED",
@@ -51,6 +51,7 @@ export interface IRide {
   destination: string;
 
   fare?: number;
+  vehicleType?: VehicleType;
   paymentMethod?: PaymentMethod;
   status: RideStatus;
   timestamps?: ITimestamp;

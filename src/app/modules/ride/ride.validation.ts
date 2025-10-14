@@ -1,6 +1,7 @@
 import z from "zod";
 import { PaymentMethod } from "./ride.interface";
 import { Types } from "mongoose";
+import { VehicleType } from "../user/user.interface";
 
 // Zod scheme for ride request validation
 export const rideRequestZodSchema = z.object({
@@ -58,6 +59,9 @@ export const rideRequestZodSchema = z.object({
           : "Fare must be a number",
     })
     .min(1, "Distance must be a positive integer"),
+
+  // Vehicle Type
+  vehicleType: z.enum(Object.values(VehicleType) as [string]),
 
   // Payment Method
   paymentMethod: z.enum(Object.values(PaymentMethod) as [string]),

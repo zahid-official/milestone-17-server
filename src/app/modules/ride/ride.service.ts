@@ -11,7 +11,7 @@ import Ride from "./ride.model";
 // Get all rides (Admin only)
 const getAllRides = async (query: Record<string, string>) => {
   // Define searchable fields
-  const searchFields = ["pickup", "destination", "status"];
+  const searchFields = ["pickup", "destination", "vehicleType"];
 
   const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
   const rides = await queryBuilder
@@ -117,7 +117,7 @@ const viewRideHistory = async (
   query: Record<string, string>
 ) => {
   // Define searchable fields
-  const searchFields = ["pickup", "destination", "status"];
+  const searchFields = ["pickup", "destination", "vehicleType"];
 
   const queryBuilder = new QueryBuilder<IRide>(
     Ride.find({ userId: userId }),
