@@ -1,5 +1,24 @@
 import { Types } from "mongoose";
-import { AvailabilityStatus, IVehicle } from "../driver/driver.interface";
+
+// Defines vehicle types
+export enum VehicleType {
+  CAR = "CAR",
+  BIKE = "BIKE",
+}
+
+// Vehicle information interface
+export interface IVehicle {
+  vehicleType: VehicleType;
+  vehicleModel: string;
+  plateNumber: string;
+}
+
+// Defines driver availability
+export enum AvailabilityStatus {
+  ONLINE = "ONLINE",
+  OFFLINE = "OFFLINE",
+  ON_RIDE = "ON_RIDE",
+}
 
 // Defines user roles
 export enum Role {

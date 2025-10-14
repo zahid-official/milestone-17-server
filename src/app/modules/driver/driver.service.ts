@@ -5,12 +5,12 @@ import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
-import { AccountStatus, Role } from "../user/user.interface";
 import {
-  ApplicationStatus,
+  AccountStatus,
   AvailabilityStatus,
-  IDriver,
-} from "./driver.interface";
+  Role,
+} from "../user/user.interface";
+import { IDriver } from "./driver.interface";
 
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
@@ -73,21 +73,6 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
     );
   }
 
-  const existingDriver = await Driver.findOne({ userId: payload.userId });
-  if (existingDriver?.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved"
-    );
-  }
-
-  if (existingDriver?.applicationStatus === ApplicationStatus.PENDING) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      "You have already applied for driver. Please wait for the approval"
-    );
-  }
-
   const existingLicense = await Driver.findOne({
     licenseNumber: payload.licenseNumber,
   });
@@ -119,15 +104,7 @@ const approveDriver = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved"
-    );
-  }
-
   // Approve the driver application
-  driver.applicationStatus = ApplicationStatus.APPROVED;
   driver.availability = AvailabilityStatus.ONLINE;
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.DRIVER });
@@ -141,22 +118,7 @@ const rejectDriver = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved. You cannot reject an approved application"
-    );
-  }
-
-  if (driver.applicationStatus === ApplicationStatus.REJECTED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been rejected"
-    );
-  }
-
   // Reject the driver application
-  driver.applicationStatus = ApplicationStatus.REJECTED;
   driver.availability = undefined;
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.RIDER });
@@ -168,13 +130,6 @@ const suspendDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can be suspended"
-    );
   }
 
   const user = await User.findById(driver.userId);
@@ -209,13 +164,6 @@ const unsuspendDriver = async (driverId: string) => {
   const driver = await Driver.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can be unsuspended"
-    );
   }
 
   const user = await User.findById(driver.userId);
@@ -263,13 +211,6 @@ const updateDriverDetails = async (
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to update this driver details"
-    );
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can update their details"
     );
   }
 
@@ -327,13 +268,6 @@ const availabilityStatus = async (
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to update this driver details"
-    );
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can update availability status"
     );
   }
 

@@ -1,10 +1,6 @@
 import { model, Schema } from "mongoose";
-import { IUser, AccountStatus, IAuthProvider, Role } from "./user.interface";
-import {
-  AvailabilityStatus,
-  IVehicle,
-  VehicleType,
-} from "../driver/driver.interface";
+import { IUser, AccountStatus, IAuthProvider, Role, IVehicle, VehicleType, AvailabilityStatus } from "./user.interface";
+
 
 // Define vehicle schema
 const vehicleSchema = new Schema<IVehicle>(

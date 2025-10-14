@@ -1,6 +1,6 @@
 import z from "zod";
 import { Types } from "mongoose";
-import { AvailabilityStatus, VehicleType } from "./driver.interface";
+import { AvailabilityStatus, VehicleType } from "../user/user.interface";
 
 // Vehicle schema
 const VehicleSchema = z.object({

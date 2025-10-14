@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IVehicle } from "../driver/driver.interface";
+import { IVehicle } from "../user/user.interface";
 
 export enum RideStatus {
   REQUESTED = "REQUESTED",

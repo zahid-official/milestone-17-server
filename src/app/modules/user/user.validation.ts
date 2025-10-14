@@ -1,6 +1,5 @@
 import z from "zod";
-import { AccountStatus, Role } from "./user.interface";
-import { VehicleType } from "../driver/driver.interface";
+import { AccountStatus, Role, VehicleType } from "./user.interface";
 
 // Vehicle schema
 const VehicleSchema = z.object({
