@@ -62,10 +62,9 @@ const getSingleRide = async (rideId: string) => {
   // Get driver info if driverId exists
   let driverInfo = null;
   if (ride.driverId) {
-    driverInfo = await Driver.findOne({ userId: ride.driverId })
-      .select("-applicationStatus -completedRides -createdAt -updatedAt")
-      .populate<{ userId: IDriverUser }>("userId", "name email phone")
-      .lean();
+    driverInfo = await User.findById(ride.driverId).select(
+      "-_id name email phone accountStatus role licenseNumber vehicleInfo"
+    );
   }
 
   return {
@@ -141,10 +140,9 @@ const viewRideHistory = async (
         return { ...ride, driverInfo: null };
       }
 
-      const driverInfo = await Driver.findOne({ userId: ride.driverId })
-        .select("-applicationStatus -completedRides -createdAt -updatedAt")
-        .populate<{ userId: IDriverUser }>("userId", "name email phone")
-        .lean();
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
 
       return { ...ride, driverInfo: driverInfo || null };
     })
