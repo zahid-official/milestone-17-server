@@ -43,7 +43,8 @@ const getSingleRide = catchAsync(
 // Get active ride (Rider only)
 const activeRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await rideService.activeRide();
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.activeRide(userId);
 
     // Send response
     sendResponse(res, {

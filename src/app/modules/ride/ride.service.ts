@@ -74,8 +74,9 @@ const getSingleRide = async (rideId: string) => {
 };
 
 // Get active ride
-const activeRide = async () => {
+const activeRide = async (userId: string) => {
   const ride = await Ride.findOne({
+    userId,
     status: {
       $nin: [RideStatus.COMPLETED, RideStatus.CANCELLED, RideStatus.REJECTED],
     },
