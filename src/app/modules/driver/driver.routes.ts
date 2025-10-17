@@ -1,13 +1,13 @@
 import { Router } from "express";
 import validateSchema from "../../middlewares/validateSchema";
-import {
-  availabilityStatusZodSchema,
-  becomeDriverZodSchema,
-  updateDriverDetailsZodSchema,
-} from "./driver.validation";
-import driverController from "./driver.controller";
 import validateToken from "../../middlewares/validateToken";
 import { Role } from "../user/user.interface";
+import driverController from "./driver.controller";
+import {
+  becomeDriverZodSchema,
+  updateDriverDetailsZodSchema
+} from "./driver.validation";
+import { updateUserZodSchema } from "../user/user.validation";
 
 // Initialize router
 const router = Router();
@@ -66,9 +66,9 @@ router.patch(
   driverController.updateDriverDetails
 );
 router.patch(
-  "/availability/:driverId",
+  "/availability",
   validateToken(Role.DRIVER),
-  validateSchema(availabilityStatusZodSchema),
+  validateSchema(updateUserZodSchema),
   driverController.availabilityStatus
 );
 

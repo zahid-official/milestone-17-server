@@ -256,23 +256,15 @@ const updateDriverDetails = async (
 // Update availability status
 const availabilityStatus = async (
   userId: string,
-  driverId: string,
   payload: Partial<IDriver>
 ) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(userId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (userId !== driver.userId.toString()) {
-    throw new AppError(
-      httpStatus.UNAUTHORIZED,
-      "You are not authorized to update this driver details"
-    );
-  }
-
   // Update driver details
-  const updatedDriver = await Driver.findByIdAndUpdate(driverId, payload, {
+  const updatedDriver = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
   });

@@ -165,18 +165,13 @@ const availabilityStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const body = req?.body;
     const userId = req?.decodedToken?.userId;
-    const driverId = req?.params?.driverId;
-    const result = await driverService.availabilityStatus(
-      userId,
-      driverId,
-      body
-    );
+    const result = await driverService.availabilityStatus(userId, body);
 
     // Send response
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Driver details updated successfully",
+      message: "Driver availability updated successfully",
       data: result,
     });
   }

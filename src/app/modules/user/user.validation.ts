@@ -1,5 +1,10 @@
 import z from "zod";
-import { AccountStatus, Role, VehicleType } from "./user.interface";
+import {
+  AccountStatus,
+  AvailabilityStatus,
+  Role,
+  VehicleType,
+} from "./user.interface";
 
 // Vehicle schema
 const VehicleSchema = z.object({
@@ -96,6 +101,9 @@ export const registerUserZodSchema = z.object({
 
   // Vehicle Info
   vehicleInfo: VehicleSchema.optional(),
+
+  // Availablity
+  availability: z.enum(Object.values(AvailabilityStatus)).optional(),
 });
 
 // Zod scheme for updating user data
@@ -154,4 +162,7 @@ export const updateUserZodSchema = z.object({
 
   // Vehicle Info
   vehicleInfo: VehicleSchema.optional(),
+
+  // Availablity
+  availability: z.enum(Object.values(AvailabilityStatus)).optional(),
 });
