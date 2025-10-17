@@ -56,6 +56,22 @@ const activeRide = catchAsync(
   }
 );
 
+// Get driver current ride (Driver only)
+const driverCurrentRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.driverCurrentRide(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Current active ride details retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Get all requested rides (Admin and Driver only)
 const getAllRequestedRides = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -217,6 +233,7 @@ const rideController = {
   getAllRides,
   getSingleRide,
   activeRide,
+  driverCurrentRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,

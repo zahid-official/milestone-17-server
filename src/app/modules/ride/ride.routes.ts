@@ -17,6 +17,11 @@ router.get(
 );
 router.get("/activeRide", validateToken(Role.RIDER), rideController.activeRide);
 router.get(
+  "/driverCurrentRide",
+  validateToken(Role.DRIVER),
+  rideController.driverCurrentRide
+);
+router.get(
   "/requestedRides",
   validateToken(Role.ADMIN, Role.DRIVER),
   rideController.getAllRequestedRides

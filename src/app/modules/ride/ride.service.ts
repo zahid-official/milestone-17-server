@@ -73,7 +73,7 @@ const getSingleRide = async (rideId: string) => {
   };
 };
 
-// Get active ride
+// Get active ride (Rider only)
 const activeRide = async (userId: string) => {
   const ride = await Ride.findOne({
     userId,
@@ -81,6 +81,24 @@ const activeRide = async (userId: string) => {
       $nin: [RideStatus.COMPLETED, RideStatus.CANCELLED, RideStatus.REJECTED],
     },
   });
+
+  return ride;
+};
+
+// Get driver current ride (Driver only)
+const driverCurrentRide = async (userId: string) => {
+  const ride = await Ride.findOne({
+    driverId: userId,
+    status: {
+      $nin: [
+        RideStatus.REQUESTED,
+        RideStatus.COMPLETED,
+        RideStatus.CANCELLED,
+        RideStatus.REJECTED,
+      ],
+    },
+  });
+
   return ride;
 };
 
@@ -413,6 +431,7 @@ const rideService = {
   getAllRides,
   getSingleRide,
   activeRide,
+  driverCurrentRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,
