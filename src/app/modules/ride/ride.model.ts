@@ -20,7 +20,7 @@ const timestampsSchema = new Schema<ITimestamp>(
 const rideSchema = new Schema<IRide>(
   {
     userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-    driverId: { type: Schema.Types.ObjectId, ref: "Driver" },
+    driverId: { type: Schema.Types.ObjectId, ref: "User" },
 
     pickup: { type: String, required: true },
     distance: { type: Number, required: true },

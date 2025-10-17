@@ -5,7 +5,7 @@ import { Role } from "../user/user.interface";
 import driverController from "./driver.controller";
 import {
   becomeDriverZodSchema,
-  updateDriverDetailsZodSchema
+  updateDriverDetailsZodSchema,
 } from "./driver.validation";
 import { updateUserZodSchema } from "../user/user.validation";
 
@@ -22,6 +22,11 @@ router.get(
   "/singleDriver/:driverId",
   validateToken(Role.ADMIN),
   driverController.getSingleDriverApplication
+);
+router.get(
+  "/ridesHistory",
+  validateToken(Role.DRIVER),
+  driverController.ridesHistory
 );
 router.get(
   "/earning",

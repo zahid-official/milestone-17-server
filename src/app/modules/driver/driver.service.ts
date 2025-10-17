@@ -11,6 +11,8 @@ import {
   Role,
 } from "../user/user.interface";
 import { IDriver } from "./driver.interface";
+import Ride from "../ride/ride.model";
+import { IRide } from "../ride/ride.interface";
 
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
@@ -48,6 +50,50 @@ const getSingleDriverApplication = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
   }
   return driver;
+};
+
+// Get rides history (Driver only)
+const ridesHistory = async (userId: string, query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "vehicleType"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ driverId: userId }),
+    query
+  );
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .dateRangeFilter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("driverId", "name email phone")
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
+  );
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+  return {
+    data: ridesData,
+    meta,
+  };
 };
 
 // View earnings history (Driver only)
@@ -276,6 +322,7 @@ const availabilityStatus = async (
 const driverService = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  ridesHistory,
   viewEarningsHistory,
   becomeDriver,
   approveDriver,

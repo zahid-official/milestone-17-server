@@ -40,6 +40,27 @@ const getSingleDriverApplication = catchAsync(
   }
 );
 
+// Get rides history (Driver only)
+const ridesHistory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const userId = req?.decodedToken?.userId;
+    const result = await driverService.ridesHistory(
+      userId,
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride history retrieved successfully",
+      data: result.data,
+      meta: result.meta,
+    });
+  }
+);
+
 // View earnings history (Driver only)
 const viewEarningsHistory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -181,6 +202,7 @@ const availabilityStatus = catchAsync(
 const driverController = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  ridesHistory,
   viewEarningsHistory,
   becomeDriver,
   approveDriver,
