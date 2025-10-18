@@ -99,7 +99,7 @@ const blockUser = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "User blocked successfully",
+      message: "Rider blocked successfully",
       data: result,
     });
   }
@@ -115,7 +115,7 @@ const unblockUser = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "User unblocked successfully",
+      message: "Rider unblocked successfully",
       data: result,
     });
   }

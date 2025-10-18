@@ -173,24 +173,12 @@ const rejectDriver = async (driverId: string) => {
 
 // Suspend driver
 const suspendDriver = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  const user = await User.findById(driver.userId);
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
-  }
-
-  if (user.role !== Role.DRIVER) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "The associated user is not a driver"
-    );
-  }
-
-  if (user.accountStatus === AccountStatus.SUSPENDED) {
+  if (driver.accountStatus === AccountStatus.SUSPENDED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "This driver is already suspended"
@@ -198,8 +186,7 @@ const suspendDriver = async (driverId: string) => {
   }
 
   // Suspend the driver
-  user.accountStatus = AccountStatus.SUSPENDED;
-  await user.save();
+  driver.accountStatus = AccountStatus.SUSPENDED;
   driver.availability = AvailabilityStatus.OFFLINE;
   await driver.save();
   return null;
@@ -207,24 +194,12 @@ const suspendDriver = async (driverId: string) => {
 
 // Unsuspend driver
 const unsuspendDriver = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  const user = await User.findById(driver.userId);
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
-  }
-
-  if (user.role !== Role.DRIVER) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "The associated user is not a driver"
-    );
-  }
-
-  if (user.accountStatus === AccountStatus.ACTIVE) {
+  if (driver.accountStatus === AccountStatus.ACTIVE) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "This driver is already unsuspended"
@@ -232,8 +207,7 @@ const unsuspendDriver = async (driverId: string) => {
   }
 
   // Suspend the driver
-  user.accountStatus = AccountStatus.ACTIVE;
-  await user.save();
+  driver.accountStatus = AccountStatus.ACTIVE;
   driver.availability = AvailabilityStatus.ONLINE;
   await driver.save();
   return null;

@@ -10,7 +10,7 @@ import { AccountStatus, IAuthProvider, IUser, Role } from "./user.interface";
 // Get all users
 const getAllUsers = async (query: Record<string, string>) => {
   // Define searchable fields
-  const searchFields = ["name", "email"];
+  const searchFields = ["name", "email", "role"];
 
   const queryBuilder = new QueryBuilder<IUser>(
     User.find().select("-password").lean(),
