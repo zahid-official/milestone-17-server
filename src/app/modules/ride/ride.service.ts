@@ -269,6 +269,15 @@ const acceptRide = async (driverId: string, rideId: string) => {
     );
   }
 
+  // Check if driver's vehicle type matches ride's vehicle type
+  const driverVehicle = await User.findById(driverId);
+  if (driverVehicle?.vehicleInfo?.vehicleType !== ride.vehicleType) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `This ride requires a vehicle of type '${ride.vehicleType}'. Your registered vehicle type is '${driverVehicle?.vehicleInfo?.vehicleType}'. To accept this ride, please update your vehicle information in your profile.`
+    );
+  }
+
   // check if driver already accepted a ride and assign driverId
   const existingRide = await Ride.findOne({
     driverId: driverId,
