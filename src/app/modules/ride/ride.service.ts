@@ -5,7 +5,7 @@ import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
 import Driver from "../driver/driver.model";
 import User from "../user/user.model";
-import { IDriverUser, IRide, RideStatus } from "./ride.interface";
+import { IRide, RideStatus } from "./ride.interface";
 import Ride from "./ride.model";
 
 // Get all rides (Admin only)
@@ -17,6 +17,7 @@ const getAllRides = async (query: Record<string, string>) => {
   const rides = await queryBuilder
     .sort()
     .filter()
+    .dateRangeFilter()
     .paginate()
     .fieldSelect()
     .search(searchFields)
@@ -31,10 +32,9 @@ const getAllRides = async (query: Record<string, string>) => {
         return { ...ride, driverInfo: null };
       }
 
-      const driverInfo = await Driver.findOne({ userId: ride.driverId })
-        .select("-applicationStatus -completedRides -createdAt -updatedAt")
-        .populate<{ userId: IDriverUser }>("userId", "name email phone")
-        .lean();
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
 
       return { ...ride, driverInfo: driverInfo || null };
     })
