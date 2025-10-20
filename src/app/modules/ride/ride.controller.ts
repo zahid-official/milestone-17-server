@@ -24,6 +24,24 @@ const getAllRides = catchAsync(
   }
 );
 
+// Get all rides analytics (Admin only)
+const rideAnalytics = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const result = await rideService.rideAnalytics(
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All rides analytics retrieved successfully",
+      data: result,
+    });
+  }
+);
+
 // Get single rides
 const getSingleRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -231,6 +249,7 @@ const completeRide = catchAsync(
 // Ride controller object
 const rideController = {
   getAllRides,
+  rideAnalytics,
   getSingleRide,
   activeRide,
   driverCurrentRide,

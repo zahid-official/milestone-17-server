@@ -48,6 +48,32 @@ const getAllRides = async (query: Record<string, string>) => {
   };
 };
 
+// Get all rides analytics (Admin only)
+const rideAnalytics = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
+  const rides = await queryBuilder
+    .filter()
+    .build()
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
+  );
+  return ridesData;
+};
+
 // Get single ride
 const getSingleRide = async (rideId: string) => {
   // Get the ride and populate rider info
@@ -447,6 +473,7 @@ const completeRide = async (rideId: string) => {
 // Ride service object
 const rideService = {
   getAllRides,
+  rideAnalytics,
   getSingleRide,
   activeRide,
   driverCurrentRide,
