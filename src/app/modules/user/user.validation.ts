@@ -165,4 +165,24 @@ export const updateUserZodSchema = z.object({
 
   // Availablity
   availability: z.enum(Object.values(AvailabilityStatus)).optional(),
+
+  // Emergency Contact
+  emergencyContact: z
+    .string({ error: "Phone Number must be string" })
+    .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+      error:
+        "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
+    })
+    .trim()
+    .optional(),
+
+  // Emergency Contact 2
+  emergencyContact2: z
+    .string({ error: "Phone Number must be string" })
+    .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+      error:
+        "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
+    })
+    .trim()
+    .optional(),
 });

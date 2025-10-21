@@ -61,4 +61,7 @@ export interface IUser {
   licenseNumber?: string;
   vehicleInfo?: IVehicle;
   availability?: AvailabilityStatus;
+
+  emergencyContact?: string;
+  emergencyContact2?: string;
 }

@@ -1,6 +1,13 @@
 import { model, Schema } from "mongoose";
-import { IUser, AccountStatus, IAuthProvider, Role, IVehicle, VehicleType, AvailabilityStatus } from "./user.interface";
-
+import {
+  IUser,
+  AccountStatus,
+  IAuthProvider,
+  Role,
+  IVehicle,
+  VehicleType,
+  AvailabilityStatus,
+} from "./user.interface";
 
 // Define vehicle schema
 const vehicleSchema = new Schema<IVehicle>(
@@ -53,6 +60,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Object.values(AvailabilityStatus),
     },
+
+    emergencyContact: { type: String },
+    emergencyContact2: { type: String },
   },
   {
     versionKey: false,
