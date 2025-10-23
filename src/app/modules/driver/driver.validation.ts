@@ -1,6 +1,6 @@
-import z from "zod";
 import { Types } from "mongoose";
-import { AvailabilityStatus, VehicleType } from "./driver.interface";
+import z from "zod";
+import { VehicleType } from "../user/user.interface";
 
 // Vehicle schema
 const VehicleSchema = z.object({
@@ -97,9 +97,4 @@ export const updateDriverDetailsZodSchema = z.object({
 
   // Vehicle Info
   vehicleInfo: UpdatedVehicle.optional(),
-});
-
-// Zod schema for updating availability status
-export const availabilityStatusZodSchema = z.object({
-  availability: z.enum(Object.values(AvailabilityStatus)),
 });

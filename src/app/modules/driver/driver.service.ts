@@ -5,12 +5,14 @@ import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
 import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
-import { AccountStatus, Role } from "../user/user.interface";
 import {
-  ApplicationStatus,
+  AccountStatus,
   AvailabilityStatus,
-  IDriver,
-} from "./driver.interface";
+  Role,
+} from "../user/user.interface";
+import { IDriver } from "./driver.interface";
+import Ride from "../ride/ride.model";
+import { IRide } from "../ride/ride.interface";
 
 // Get all driver applications
 const getAllDriverApplications = async (query: Record<string, string>) => {
@@ -30,7 +32,7 @@ const getAllDriverApplications = async (query: Record<string, string>) => {
     .fieldSelect()
     .search(searchFields)
     .build()
-    .populate("userId", "name email phone role");
+    .populate("userId", "name email phone role accountStatus");
 
   // Get meta data for pagination
   const meta = await queryBuilder.meta();
@@ -48,6 +50,50 @@ const getSingleDriverApplication = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver applicaion not found");
   }
   return driver;
+};
+
+// Get rides history (Driver only)
+const ridesHistory = async (userId: string, query: Record<string, string>) => {
+  // Define searchable fields
+  const searchFields = ["pickup", "destination", "vehicleType"];
+
+  const queryBuilder = new QueryBuilder<IRide>(
+    Ride.find({ driverId: userId }),
+    query
+  );
+  const rides = await queryBuilder
+    .sort()
+    .filter()
+    .dateRangeFilter()
+    .paginate()
+    .fieldSelect()
+    .search(searchFields)
+    .build()
+    .populate("driverId", "name email phone")
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
+  );
+
+  // Get meta data for pagination
+  const meta = await queryBuilder.meta();
+  return {
+    data: ridesData,
+    meta,
+  };
 };
 
 // View earnings history (Driver only)
@@ -70,21 +116,6 @@ const becomeDriver = async (userId: string, payload: Partial<IDriver>) => {
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to apply for driver. Please login to your account and try again"
-    );
-  }
-
-  const existingDriver = await Driver.findOne({ userId: payload.userId });
-  if (existingDriver?.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved"
-    );
-  }
-
-  if (existingDriver?.applicationStatus === ApplicationStatus.PENDING) {
-    throw new AppError(
-      httpStatus.CONFLICT,
-      "You have already applied for driver. Please wait for the approval"
     );
   }
 
@@ -119,15 +150,7 @@ const approveDriver = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved"
-    );
-  }
-
   // Approve the driver application
-  driver.applicationStatus = ApplicationStatus.APPROVED;
   driver.availability = AvailabilityStatus.ONLINE;
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.DRIVER });
@@ -141,22 +164,7 @@ const rejectDriver = async (driverId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus === ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been approved. You cannot reject an approved application"
-    );
-  }
-
-  if (driver.applicationStatus === ApplicationStatus.REJECTED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "This application has already been rejected"
-    );
-  }
-
   // Reject the driver application
-  driver.applicationStatus = ApplicationStatus.REJECTED;
   driver.availability = undefined;
   await driver.save();
   await User.findByIdAndUpdate(driver.userId, { role: Role.RIDER });
@@ -165,31 +173,12 @@ const rejectDriver = async (driverId: string) => {
 
 // Suspend driver
 const suspendDriver = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can be suspended"
-    );
-  }
-
-  const user = await User.findById(driver.userId);
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
-  }
-
-  if (user.role !== Role.DRIVER) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "The associated user is not a driver"
-    );
-  }
-
-  if (user.accountStatus === AccountStatus.SUSPENDED) {
+  if (driver.accountStatus === AccountStatus.SUSPENDED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "This driver is already suspended"
@@ -197,8 +186,7 @@ const suspendDriver = async (driverId: string) => {
   }
 
   // Suspend the driver
-  user.accountStatus = AccountStatus.SUSPENDED;
-  await user.save();
+  driver.accountStatus = AccountStatus.SUSPENDED;
   driver.availability = AvailabilityStatus.OFFLINE;
   await driver.save();
   return null;
@@ -206,31 +194,12 @@ const suspendDriver = async (driverId: string) => {
 
 // Unsuspend driver
 const unsuspendDriver = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(driverId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can be unsuspended"
-    );
-  }
-
-  const user = await User.findById(driver.userId);
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "Associated user not found");
-  }
-
-  if (user.role !== Role.DRIVER) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "The associated user is not a driver"
-    );
-  }
-
-  if (user.accountStatus === AccountStatus.ACTIVE) {
+  if (driver.accountStatus === AccountStatus.ACTIVE) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "This driver is already unsuspended"
@@ -238,8 +207,7 @@ const unsuspendDriver = async (driverId: string) => {
   }
 
   // Suspend the driver
-  user.accountStatus = AccountStatus.ACTIVE;
-  await user.save();
+  driver.accountStatus = AccountStatus.ACTIVE;
   driver.availability = AvailabilityStatus.ONLINE;
   await driver.save();
   return null;
@@ -263,13 +231,6 @@ const updateDriverDetails = async (
     throw new AppError(
       httpStatus.UNAUTHORIZED,
       "You are not authorized to update this driver details"
-    );
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can update their details"
     );
   }
 
@@ -315,30 +276,15 @@ const updateDriverDetails = async (
 // Update availability status
 const availabilityStatus = async (
   userId: string,
-  driverId: string,
   payload: Partial<IDriver>
 ) => {
-  const driver = await Driver.findById(driverId);
+  const driver = await User.findById(userId);
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
   }
 
-  if (userId !== driver.userId.toString()) {
-    throw new AppError(
-      httpStatus.UNAUTHORIZED,
-      "You are not authorized to update this driver details"
-    );
-  }
-
-  if (driver.applicationStatus !== ApplicationStatus.APPROVED) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Only approved drivers can update availability status"
-    );
-  }
-
   // Update driver details
-  const updatedDriver = await Driver.findByIdAndUpdate(driverId, payload, {
+  const updatedDriver = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
   });
@@ -350,6 +296,7 @@ const availabilityStatus = async (
 const driverService = {
   getAllDriverApplications,
   getSingleDriverApplication,
+  ridesHistory,
   viewEarningsHistory,
   becomeDriver,
   approveDriver,

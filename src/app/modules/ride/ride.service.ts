@@ -5,43 +5,125 @@ import AppError from "../../errors/AppError";
 import QueryBuilder from "../../utils/queryBuilder";
 import Driver from "../driver/driver.model";
 import User from "../user/user.model";
-import { IDriverUser, IRide, RideStatus } from "./ride.interface";
+import { IRide, RideStatus } from "./ride.interface";
 import Ride from "./ride.model";
 
 // Get all rides (Admin only)
 const getAllRides = async (query: Record<string, string>) => {
   // Define searchable fields
-  const searchFields = ["pickup", "destination", "status"];
+  const searchFields = ["pickup", "destination", "vehicleType"];
 
   const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
   const rides = await queryBuilder
     .sort()
     .filter()
+    .dateRangeFilter()
     .paginate()
     .fieldSelect()
     .search(searchFields)
     .build()
-    .populate("userId", "name email phone");
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
+  );
 
   // Get meta data for pagination
   const meta = await queryBuilder.meta();
-
   return {
-    data: rides,
+    data: ridesData,
     meta,
   };
 };
 
-// Get single ride (Admin only)
-const getSingleRide = async (rideId: string) => {
-  const ride = await Ride.findById(rideId).populate(
-    "userId",
-    "name email phone"
+// Get all rides analytics (Admin only)
+const rideAnalytics = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder<IRide>(Ride.find(), query);
+  const rides = await queryBuilder
+    .filter()
+    .build()
+    .populate("userId", "name email phone")
+    .lean<IRide[]>();
+
+  // Get driver info
+  const ridesData = await Promise.all(
+    rides.map(async (ride) => {
+      if (!ride.driverId) {
+        return { ...ride, driverInfo: null };
+      }
+
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
+
+      return { ...ride, driverInfo: driverInfo || null };
+    })
   );
+  return ridesData;
+};
+
+// Get single ride
+const getSingleRide = async (rideId: string) => {
+  // Get the ride and populate rider info
+  const ride = await Ride.findById(rideId)
+    .populate("userId", "name email phone")
+    .lean<IRide | null>();
 
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
   }
+
+  // Get driver info if driverId exists
+  let driverInfo = null;
+  if (ride.driverId) {
+    driverInfo = await User.findById(ride.driverId).select(
+      "-_id name email phone accountStatus role licenseNumber vehicleInfo"
+    );
+  }
+
+  return {
+    ...ride,
+    driverInfo: driverInfo || null,
+  };
+};
+
+// Get active ride (Rider only)
+const activeRide = async (userId: string) => {
+  const ride = await Ride.findOne({
+    userId,
+    status: {
+      $nin: [RideStatus.COMPLETED, RideStatus.CANCELLED, RideStatus.REJECTED],
+    },
+  });
+
+  return ride;
+};
+
+// Get driver current ride (Driver only)
+const driverCurrentRide = async (userId: string) => {
+  const ride = await Ride.findOne({
+    driverId: userId,
+    status: {
+      $nin: [
+        RideStatus.REQUESTED,
+        RideStatus.COMPLETED,
+        RideStatus.CANCELLED,
+        RideStatus.REJECTED,
+      ],
+    },
+  });
 
   return ride;
 };
@@ -79,7 +161,7 @@ const viewRideHistory = async (
   query: Record<string, string>
 ) => {
   // Define searchable fields
-  const searchFields = ["pickup", "destination", "status"];
+  const searchFields = ["pickup", "destination", "vehicleType"];
 
   const queryBuilder = new QueryBuilder<IRide>(
     Ride.find({ userId: userId }),
@@ -88,6 +170,7 @@ const viewRideHistory = async (
   const rides = await queryBuilder
     .sort()
     .filter()
+    .dateRangeFilter()
     .paginate()
     .fieldSelect()
     .search(searchFields)
@@ -102,10 +185,9 @@ const viewRideHistory = async (
         return { ...ride, driverInfo: null };
       }
 
-      const driverInfo = await Driver.findOne({ userId: ride.driverId })
-        .select("-applicationStatus -completedRides -createdAt -updatedAt")
-        .populate<{ userId: IDriverUser }>("userId", "name email phone")
-        .lean();
+      const driverInfo = await User.findById(ride.driverId).select(
+        "-_id name email accountStatus role licenseNumber vehicleInfo"
+      );
 
       return { ...ride, driverInfo: driverInfo || null };
     })
@@ -213,6 +295,15 @@ const acceptRide = async (driverId: string, rideId: string) => {
     );
   }
 
+  // Check if driver's vehicle type matches ride's vehicle type
+  const driverVehicle = await User.findById(driverId);
+  if (driverVehicle?.vehicleInfo?.vehicleType !== ride.vehicleType) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `This ride requires a vehicle of type '${ride.vehicleType}'. Your registered vehicle type is '${driverVehicle?.vehicleInfo?.vehicleType}'. To accept this ride, please update your vehicle information in your profile.`
+    );
+  }
+
   // check if driver already accepted a ride and assign driverId
   const existingRide = await Ride.findOne({
     driverId: driverId,
@@ -253,6 +344,15 @@ const rejectRide = async (driverId: string, rideId: string) => {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       "Only rides with status 'REQUESTED' can be rejected"
+    );
+  }
+
+  // Check if driver's vehicle type matches ride's vehicle type
+  const driverVehicle = await User.findById(driverId);
+  if (driverVehicle?.vehicleInfo?.vehicleType !== ride.vehicleType) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `This ride requires a vehicle of type '${ride.vehicleType}'. Your registered vehicle type is '${driverVehicle?.vehicleInfo?.vehicleType}'. To reject this ride, please update your vehicle information in your profile.`
     );
   }
 
@@ -373,7 +473,10 @@ const completeRide = async (rideId: string) => {
 // Ride service object
 const rideService = {
   getAllRides,
+  rideAnalytics,
   getSingleRide,
+  activeRide,
+  driverCurrentRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,
