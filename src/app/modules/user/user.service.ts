@@ -10,7 +10,7 @@ import { AccountStatus, IAuthProvider, IUser, Role } from "./user.interface";
 // Get all users
 const getAllUsers = async (query: Record<string, string>) => {
   // Define searchable fields
-  const searchFields = ["name", "email"];
+  const searchFields = ["name", "email", "role"];
 
   const queryBuilder = new QueryBuilder<IUser>(
     User.find().select("-password").lean(),
@@ -63,6 +63,11 @@ const registerUser = async (payload: Partial<IUser>) => {
     provider: "credentials",
     providerId: email as string, // Using email as providerId for credentials
   };
+
+  // If vehicleInfo is provided, set role to DRIVER
+  if (rest?.vehicleInfo) {
+    rest.role = Role.DRIVER;
+  }
 
   const user = await User.create({
     email,

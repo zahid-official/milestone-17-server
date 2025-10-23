@@ -6,4 +6,5 @@ export const excludeFields = [
   "fields",
   "minFare",
   "maxFare",
+  "dateRange",
 ];

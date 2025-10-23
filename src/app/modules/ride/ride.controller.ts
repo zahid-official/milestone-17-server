@@ -24,7 +24,25 @@ const getAllRides = catchAsync(
   }
 );
 
-// Get single rides (Admin only)
+// Get all rides analytics (Admin only)
+const rideAnalytics = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req?.query;
+    const result = await rideService.rideAnalytics(
+      query as Record<string, string>
+    );
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "All rides analytics retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+// Get single rides
 const getSingleRide = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const rideId = req?.params?.rideId;
@@ -34,7 +52,39 @@ const getSingleRide = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "All rides retrieved successfully",
+      message: "Ride Details retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+// Get active ride (Rider only)
+const activeRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.activeRide(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Active ride details retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+// Get driver current ride (Driver only)
+const driverCurrentRide = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req?.decodedToken?.userId;
+    const result = await rideService.driverCurrentRide(userId);
+
+    // Send response
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Current active ride details retrieved successfully",
       data: result,
     });
   }
@@ -199,7 +249,10 @@ const completeRide = catchAsync(
 // Ride controller object
 const rideController = {
   getAllRides,
+  rideAnalytics,
   getSingleRide,
+  activeRide,
+  driverCurrentRide,
   getAllRequestedRides,
   viewRideHistory,
   requestRide,

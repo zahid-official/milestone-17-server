@@ -1,11 +1,6 @@
 import { model, Schema } from "mongoose";
-import {
-  ApplicationStatus,
-  AvailabilityStatus,
-  IDriver,
-  IVehicle,
-  VehicleType,
-} from "./driver.interface";
+import { AvailabilityStatus, IVehicle, VehicleType } from "../user/user.interface";
+import { IDriver } from "./driver.interface";
 
 // Define vehicle schema
 const vehicleSchema = new Schema<IVehicle>(
@@ -34,11 +29,6 @@ const driverSchema = new Schema<IDriver>(
     availability: {
       type: String,
       enum: Object.values(AvailabilityStatus),
-    },
-    applicationStatus: {
-      type: String,
-      enum: Object.values(ApplicationStatus),
-      default: ApplicationStatus.PENDING,
     },
     completedRides: [{ type: Schema.Types.ObjectId, ref: "Ride" }],
   },

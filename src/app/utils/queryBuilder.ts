@@ -43,6 +43,61 @@ class QueryBuilder<T> {
     return this;
   }
 
+  // Method to filter by date range
+  dateRangeFilter(): this {
+    const dateRange = this.query?.dateRange;
+
+    if (!dateRange) {
+      return this;
+    }
+
+    const now = new Date();
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    let startDate: Date;
+
+    switch (dateRange) {
+      case "today": {
+        startDate = startOfDay;
+        break;
+      }
+
+      case "week": {
+        const dayOfWeek = now.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startDate = new Date(startOfDay);
+        startDate.setDate(startDate.getDate() - daysToMonday);
+        break;
+      }
+
+      case "month": {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      }
+
+      case "year": {
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      }
+
+      default:
+        return this;
+    }
+
+    // Apply date range filter
+    this.modelQuery = this.modelQuery.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: now,
+      },
+    });
+
+    return this;
+  }
+
   // Method to select specific fields in the query (projection)
   fieldSelect(): this {
     const fields = this.query?.fields?.split(",").join(" ") || "";

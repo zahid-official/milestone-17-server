@@ -1,5 +1,29 @@
 import { model, Schema } from "mongoose";
-import { IUser, AccountStatus, IAuthProvider, Role } from "./user.interface";
+import {
+  IUser,
+  AccountStatus,
+  IAuthProvider,
+  Role,
+  IVehicle,
+  VehicleType,
+  AvailabilityStatus,
+} from "./user.interface";
+
+// Define vehicle schema
+const vehicleSchema = new Schema<IVehicle>(
+  {
+    vehicleType: {
+      type: String,
+      enum: Object.values(VehicleType),
+    },
+    vehicleModel: { type: String },
+    plateNumber: { type: String, unique: true, sparse: true },
+  },
+  {
+    versionKey: false,
+    _id: false,
+  }
+);
 
 // Define auth provider schema
 const authProvider = new Schema<IAuthProvider>(
@@ -29,6 +53,16 @@ const userSchema = new Schema<IUser>(
     role: { type: String, enum: Object.values(Role), default: Role.RIDER },
     auths: [authProvider],
     rides: [{ type: Schema.Types.ObjectId, ref: "Ride" }],
+
+    licenseNumber: { type: String, unique: true, sparse: true },
+    vehicleInfo: vehicleSchema,
+    availability: {
+      type: String,
+      enum: Object.values(AvailabilityStatus),
+    },
+
+    emergencyContact: { type: String },
+    emergencyContact2: { type: String },
   },
   {
     versionKey: false,
